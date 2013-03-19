@@ -158,42 +158,18 @@ reltempf () {
 
 ### LDAP functions ###
 
-# Checks OpenLDAP version
-# Input : nothing
-# Output : nothing, _LDAPVERSION initialized
-_ldapversion() {
-  _LDAPDOTVERSION="$($LDAPSEARCHBIN -VV 2>&1 | head -n 1 | cut -d ' ' -f 5)"
-  echo "$_LDAPDOTVERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' || \
-     end_die "Cannot determine OpenLDAP version"
-
-  _LDAPVERSIONMAJOR="$(echo $_LDAPDOTVERSION | cut -d '.' -f 1)"
-  _LDAPVERSIONMINOR="$(echo $_LDAPDOTVERSION | cut -d '.' -f 2)"
-  _LDAPVERSIONPATCH="$(echo $_LDAPDOTVERSION | cut -d '.' -f 3)"
-
-  _LDAPVERSION="$_LDAPVERSIONMAJOR"
-  [ $_LDAPVERSIONMINOR -le 9 ] && _LDAPVERSION="${_LDAPVERSION}0"
-  _LDAPVERSION="${_LDAPVERSION}${_LDAPVERSIONMINOR}"
-  [ $_LDAPVERSIONPATCH -le 9 ] && _LDAPVERSION="${_LDAPVERSION}0"
-  _LDAPVERSION="${_LDAPVERSION}${_LDAPVERSIONPATCH}"
-
-  unset _LDAPDOTVERSION
-  unset _LDAPVERSIONMAJOR
-  unset _LDAPVERSIONMINOR
-  unset _LDAPVERSIONPATCH
-}
-
 # Performs a search in the LDAP directory
 # Input : base ($1), filter ($2), attribute to display ($3)
 # Output : entry/entries found (stdout)
 _ldapsearch () {
   if [ -n "$SASLAUTH" ]
   then
-    $LDAPSEARCHBIN $_LDAPWRAP -Y "$SASLAUTH" -b "${1:-$SUFFIX}" -H "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE"
+    $LDAPSEARCHBIN $LDAPSEARCHOPTS -Y "$SASLAUTH" -b "${1:-$SUFFIX}" -H "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE"
   elif [ -n "$BINDPWDFILE" ]
   then
-    $LDAPSEARCHBIN $_LDAPWRAP -y "$BINDPWDFILE" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE" 
+    $LDAPSEARCHBIN $LDAPSEARCHOPTS -y "$BINDPWDFILE" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE" 
   else
-    $LDAPSEARCHBIN $_LDAPWRAP -w "$BINDPWD" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE" 
+    $LDAPSEARCHBIN $LDAPSEARCHOPTS -w "$BINDPWD" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE" 
   fi
 }
 
@@ -815,15 +791,6 @@ then
       GETENTGRCMD="getent group"
       ;;
   esac
-fi
-
-# Set line-wrapping according to OpenLDAP version
-_ldapversion
-if [ $_LDAPVERSION -ge 20424 ]
-then
-    _LDAPWRAP="-o ldif-wrap=no"
-else
-    _LDAPWRAP=""
 fi
 
 # Record command call into logfile
