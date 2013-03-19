@@ -2,7 +2,7 @@
 
 #  ldapmodifymachine : modifies a POSIX machine account in LDAP interactively
 
-#  Copyright (C) 2007-2011 Ganaël LAPLANCHE
+#  Copyright (C) 2007-2013 Ganaël LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License

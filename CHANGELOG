@@ -1,6 +1,7 @@
 2013/??/?? : ldapscripts 2.0.2
   - Fix long lines wrapping bug
   => thanks to Àngel "muzzol" Bosch for the original patch !
+  - Update Copyright dates
 
 2011/04/19 : ldapscripts 2.0.1
   - Fix man pages installation
