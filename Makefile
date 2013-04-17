@@ -196,6 +196,6 @@ mrproper:	clean
 package:	clean
 	@echo -n 'Creating source tarball /tmp/$(NAME)-$(VERSION)$(SUFFIX).tgz... '
 	@echo '$(VERSION)$(SUFFIX)' > VERSION
-	@(cd .. && tar czf /tmp/$(NAME)-$(VERSION)$(SUFFIX).tgz $(NAME)-$(VERSION))
+	@(cd .. && tar c --exclude '.git' -zf /tmp/$(NAME)-$(VERSION)$(SUFFIX).tgz $(NAME)-$(VERSION))
 	@echo 'ok.'
 
