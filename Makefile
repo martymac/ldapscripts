@@ -25,7 +25,7 @@ PREFIX = /usr/local
 SHELL= /bin/sh
 NAME = ldapscripts
 #SUFFIX = -devel
-VERSION = 2.0.2
+VERSION = 2.0.3
 
 # Default installation paths
 SBINDIR = $(PREFIX)/sbin

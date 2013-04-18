@@ -73,7 +73,7 @@ is_integer () {
 # Input : string to test ($1)
 # Output : true or false
 is_builtin () {
-  type "$1" 2>/dev/null | grep -qi 'built'
+  LANG=C type "$1" 2>/dev/null | grep -qi 'built'
 }
 
 # Logs a string to $LOGFILE
