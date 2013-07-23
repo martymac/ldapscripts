@@ -504,6 +504,16 @@ _uidtodn () {
   unset _TMPUDN
 }
 
+## Converts to LDAP DN any group passed in as name/gid
+## Input : the name or gid to convert ($1)
+## Output : the result of the conversion or "" if not found (stdout)
+#_gidtodn () {
+#  [ -z "$1" ] && end_die "_gidtodn : missing argument"
+#  _TMPGDN=$(_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))" dn | grep "dn: " | head -n 1 | sed "s|dn: ||")
+#  echo "$_TMPGDN"
+#  unset _TMPGDN
+#}
+
 ### LDAP advanced functions
 
 # Finds the next useable group ID

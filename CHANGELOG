@@ -1,3 +1,7 @@
+2013/07/23 : ldapscripts 2.0.4
+  - ldapaddusertogroup and ldapdeleteuserfromgroup are now able to work on
+    groups located in sub-OUs of $GSUFFIX
+
 2013/07/17 : ldapscripts 2.0.3
   - Fix Debian bug #555561
     See : http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=555561
