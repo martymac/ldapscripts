@@ -35,7 +35,7 @@ fi
 source /etc/ldapscripts/ldapscripts.conf
 
 # Check username : $1, must exist in LDAP ! Lookup base = global $SUFFIX, to work on machine and user accounts
-_ENTRY=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixAccount)(|(uid=$1)(cn=$1)(uidNumber=$1)))" dn 2>>"$LOGFILE" | grep "dn: " | head -n 1 | sed -e "s/dn: //"`
+_ENTRY=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixAccount)(|(uid=$1)(cn=$1)(uidNumber=$1)))" dn 2>>"$LOGFILE" | grep "dn: " | head -n 1 | sed -e "s|dn: ||"`
 if [ "$_ENTRY" == "" ] # User not found
 then
   echo "User $1 not found" | tee -a "$LOGFILE"
@@ -57,8 +57,8 @@ then
 fi
 
 # Modify user entry
-grep -E '^##' "$0" | sed 's/^##//' | \
-        sed -e "s/<group>/$_GID/g" -e "s/<entry>/$_ENTRY/g" | \
+grep -E '^##' "$0" | sed 's|^##||' | \
+        sed -e "s|<group>|$_GID|g" -e "s|<entry>|$_ENTRY|g" | \
         $LDAPMODIFYBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
 
 if [ $? -ne 0 ]

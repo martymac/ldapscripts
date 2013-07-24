@@ -40,7 +40,7 @@ _GROUP="$1"
 if [ "$2" == "" ] # No argument, we must find a correct GID
 then
   # Find latest in LDAP
-  _GID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixGroup)' gidNumber 2>>"$LOGFILE" | grep "gidNumber: " | sed -e "s/gidNumber: //" | uniq | sort -g | tail -n 1`
+  _GID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixGroup)' gidNumber 2>>"$LOGFILE" | grep "gidNumber: " | sed -e "s|gidNumber: ||" | uniq | sort -g | tail -n 1`
   # GID not found in LDAP
   if [ "$_GID" == "" ]
   then
@@ -57,8 +57,8 @@ then
   exit -1
 fi
 
-grep -E '^##' "$0" | sed 's/^##//' | \
-	sed -e "s/<group>/$_GROUP/g" -e "s/<gsuffix>/$GSUFFIX/g" -e "s/<suffix>/$SUFFIX/g" -e "s/<groupid>/$_GID/g" | \
+grep -E '^##' "$0" | sed 's|^##||' | \
+	sed -e "s|<group>|$_GROUP|g" -e "s|<gsuffix>|$GSUFFIX|g" -e "s|<suffix>|$SUFFIX|g" -e "s|<groupid>|$_GID|g" | \
 	$LDAPADDBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
 
 if [ $? -ne 0 ]

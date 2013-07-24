@@ -22,6 +22,7 @@ ETCDIR="/etc/ldapscripts"
 
 mkdir -p "$INSTALLDIR" 2>/dev/null
 cp _ldapdeletemachine "$INSTALLDIR"
+cp _ldapinit "$INSTALLDIR"
 cp _lsldap "$INSTALLDIR"
 cp ldapaddgroup "$INSTALLDIR"
 cp ldapadduser "$INSTALLDIR"
@@ -36,6 +37,7 @@ mkdir -p "$ETCDIR" 2>/dev/null
 if [ -f "$ETCDIR/ldapscripts.conf" ]
 then
   mv "$ETCDIR/ldapscripts.conf" "$ETCDIR/ldapscripts.conf.old"
+  echo "Old configuration file found, saved under $ETCDIR/ldapscripts.conf.old"
 fi
 cp ldapscripts.conf "$ETCDIR"
 

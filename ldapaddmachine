@@ -52,7 +52,7 @@ fi
 if [ "$3" == "" ] # No argument, we must find a correct UID
 then
   # Find latest in LDAP (base = global $SUFFIX, because machines and users are both posix accounts)
-  _UID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixAccount)' uidNumber 2>>"$LOGFILE" | grep "uidNumber: " | sed -e "s/uidNumber: //" | uniq | sort -g | tail -n 1`
+  _UID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixAccount)' uidNumber 2>>"$LOGFILE" | grep "uidNumber: " | sed -e "s|uidNumber: ||" | uniq | sort -g | tail -n 1`
   # UID not found in LDAP
   if [ "$_UID" == "" ]
   then
@@ -69,8 +69,8 @@ then
   exit -1
 fi
 
-grep -E '^##' "$0" | sed 's/^##//' | \
-	sed -e "s/<user>/$_USER/g" -e "s/<msuffix>/$MSUFFIX/g" -e "s/<suffix>/$SUFFIX/g" -e "s/<uid>/$_UID/g" -e "s/<gid>/$_GID/g" | \
+grep -E '^##' "$0" | sed 's|^##||' | \
+	sed -e "s|<user>|$_USER|g" -e "s|<msuffix>|$MSUFFIX|g" -e "s|<suffix>|$SUFFIX|g" -e "s|<uid>|$_UID|g" -e "s|<gid>|$_GID|g" | \
 	$LDAPADDBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
 
 if [ $? -ne 0 ]
@@ -91,7 +91,6 @@ exit 0
 ##uidNumber: <uid>
 ##gidNumber: <gid>
 ##homeDirectory: /dev/null
-##userPassword: 
 ##loginShell: /bin/false
 ##gecos: <user>
 ##description: <user>

@@ -35,7 +35,7 @@ fi
 source /etc/ldapscripts/ldapscripts.conf
 
 # Find machinename : $1, must exist in LDAP !
-_ENTRY=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$MSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixAccount)(|(uid=$1)(cn=$1)(uidNumber=$1)))" dn 2>>"$LOGFILE" | grep "dn: " | head -n 1 | sed -e "s/dn: //"`
+_ENTRY=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$MSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixAccount)(|(uid=$1)(cn=$1)(uidNumber=$1)))" dn 2>>"$LOGFILE" | grep "dn: " | head -n 1 | sed -e "s|dn: ||"`
 if [ "$_ENTRY" == "" ] # User not found
 then
   echo "Machine $1 not found in LDAP" | tee -a "$LOGFILE"

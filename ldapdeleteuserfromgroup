@@ -38,7 +38,7 @@ source /etc/ldapscripts/ldapscripts.conf
 _UID="$1"
 
 # Check groupname : $2, must exist in LDAP !
-_GID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixGroup)(memberUid=$1)(|(cn=$2)(gidNumber=$2)))" cn 2>>"$LOGFILE" | grep "cn: " | head -n 1 | sed -e "s/cn: //"`
+_GID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixGroup)(memberUid=$1)(|(cn=$2)(gidNumber=$2)))" cn 2>>"$LOGFILE" | grep "cn: " | head -n 1 | sed -e "s|cn: ||"`
 if [ "$_GID" == "" ] # Group not found
 then
   echo "Group $2 not found (or $1 is not a member of group $2)" | tee -a "$LOGFILE"
@@ -46,8 +46,8 @@ then
 fi
 
 # Modify group entry
-grep -E '^##' "$0" | sed 's/^##//' | \
-        sed -e "s/<group>/$_GID/g" -e "s/<gsuffix>/$GSUFFIX/g" -e "s/<suffix>/$SUFFIX/g" -e "s/<uid>/$_UID/g" | \
+grep -E '^##' "$0" | sed 's|^##||' | \
+        sed -e "s|<group>|$_GID|g" -e "s|<gsuffix>|$GSUFFIX|g" -e "s|<suffix>|$SUFFIX|g" -e "s|<uid>|$_UID|g" | \
         $LDAPMODIFYBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
 
 if [ $? -ne 0 ]

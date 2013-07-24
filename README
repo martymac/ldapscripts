@@ -59,6 +59,7 @@ ldapscripts.conf : configuration file
 install : installation script
 
 _ldapdeletemachine : not used within smb.conf (but may be useful anyway)
+_ldapinit : initializes the LDAP tree with a minimal hierarchy
 _lsldap : does a big query on the LDAP server
 ldapaddgroup : adds a POSIX group to LDAP
 ldapadduser : adds a POSIX user to LDAP

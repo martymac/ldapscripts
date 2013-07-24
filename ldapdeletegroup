@@ -35,7 +35,7 @@ fi
 source /etc/ldapscripts/ldapscripts.conf
 
 # Find groupname : $1, must exist in LDAP !
-_ENTRY=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))" dn 2>>"$LOGFILE" | grep "dn: " | head -n 1 | sed -e "s/dn: //"`
+_ENTRY=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))" dn 2>>"$LOGFILE" | grep "dn: " | head -n 1 | sed -e "s|dn: ||"`
 if [ "$_ENTRY" == "" ] # Group not found
 then
   echo "Group $1 not found in LDAP" | tee -a "$LOGFILE"

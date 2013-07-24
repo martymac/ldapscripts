@@ -1,1 +1,7 @@
+2005/02/18 : ldapscripts 1.1
+  - added _ldapinit command, to inititalize an LDAP directory with a minimal hierarchy
+  - added support for home directories creation (see ldapscripts.conf)
+  - no more need for backslashes in user home directories and user shell in ldapscripts.conf
+  - added support for initializing (randomized) passwords when adding a user.
+  - Passwords can also be recorded into a log file when performing a massive user creation (see ldapscripts.conf)
 2005/02/07 : ldapscripts 1.0

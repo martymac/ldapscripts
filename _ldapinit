@@ -1,0 +1,79 @@
+#!/bin/sh
+
+# _ldapinit : initializes the LDAP directory with a minimal tree
+
+#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+# Read configuration
+if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
+then
+  echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
+  exit -1
+fi
+
+source /etc/ldapscripts/ldapscripts.conf
+
+# Clean up suffix info
+_SUFFIX=`echo $SUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
+_USUFFIX=`echo $USUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
+_GSUFFIX=`echo $GSUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
+_MSUFFIX=`echo $MSUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
+
+grep -E '^##' "$0" | sed 's|^##||' | \
+        sed -e "s|<suffix>|$SUFFIX|g" -e "s|<_suffix>|$_SUFFIX|g" \
+            -e "s|<usuffix>|$USUFFIX|g" -e "s|<_usuffix>|$_USUFFIX|g" \
+            -e "s|<msuffix>|$MSUFFIX|g" -e "s|<_msuffix>|$_MSUFFIX|g" \
+            -e "s|<gsuffix>|$GSUFFIX|g" -e "s|<_gsuffix>|$_GSUFFIX|g" | \
+        $LDAPADDBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
+
+if [ $? -ne 0 ]
+then
+  echo "Error initializing LDAP tree" | tee -a "$LOGFILE"
+  exit -1
+fi
+
+echo "Successfully initialized LDAP tree" | tee -a "$LOGFILE"
+exit 0
+
+# Ldif info ##################################
+##dn: <suffix>
+##objectClass: dcObject
+##objectClass: organization
+##dc: <_suffix>
+##o: <_suffix>
+##description: <_suffix>
+##
+##dn: <usuffix>,<suffix>
+##objectClass: top
+##objectClass: organizationalUnit
+##ou: <_usuffix>
+##
+##dn: <gsuffix>,<suffix>
+##objectClass: top
+##objectClass: organizationalUnit
+##ou: <_gsuffix>
+##
+##dn: <msuffix>,<suffix>
+##objectClass: top
+##objectClass: organizationalUnit
+##ou: <_msuffix>
+##
+##dn: ou=Idmap,<suffix>
+##objectClass: organizationalUnit
+##ou: Idmap
+

@@ -52,7 +52,7 @@ fi
 if [ "$3" == "" ] # Not an argument, we must find a correct UID
 then
   # Find latest in LDAP (base = global $SUFFIX, because machines and users are both posix accounts)
-  _UID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixAccount)' uidNumber 2>>"$LOGFILE" | grep "uidNumber: " | sed -e "s/uidNumber: //" | uniq | sort -g | tail -n 1`
+  _UID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixAccount)' uidNumber 2>>"$LOGFILE" | grep "uidNumber: " | sed -e "s|uidNumber: ||" | uniq | sort -g | tail -n 1`
   # UID not found in LDAP
   if [ "$_UID" == "" ]
   then
@@ -69,9 +69,24 @@ then
   exit -1
 fi
 
-grep -E '^##' "$0" | sed 's/^##//' | \
-	sed -e "s/<user>/$_USER/g" -e "s/<homes>/$UHOMES/g" -e "s/<shell>/$USHELL/g" -e "s/<usuffix>/$USUFFIX/g" \
-	    -e "s/<suffix>/$SUFFIX/g" -e "s/<uid>/$_UID/g" -e "s/<gid>/$_GID/g" | \
+# Compute homedir
+_HOMEDIR=`echo "$UHOMES" | sed -e "s|%u|$_USER|g"`
+
+# Compute password
+PASSWORDGEN=`echo "$PASSWORDGEN" | sed -e "s|%u|$_USER|g"`
+_PASSWORD=`eval $PASSWORDGEN`
+# Record generated password ?
+if [ "$RECORDPASSWORDS" == "yes" ] || [ "$RECORDPASSWORDS" == "Yes" ] || [ "$RECORDPASSWORDS" == "YES" ]
+then
+  echo "$_USER : $_PASSWORD" >> "$PASSWORDFILE"
+fi
+# Finally store it into LDAP directory
+_PASSWORD=`$SLAPPASSWDBIN -s "$_PASSWORD" -h {CRYPT}`
+
+# Add user to LDAP
+grep -E '^##' "$0" | sed 's|^##||' | \
+	sed -e "s|<user>|$_USER|g" -e "s|<home>|$_HOMEDIR|g" -e "s|<shell>|$USHELL|g" -e "s|<usuffix>|$USUFFIX|g" \
+	    -e "s|<password>|$_PASSWORD|g" -e "s|<suffix>|$SUFFIX|g" -e "s|<uid>|$_UID|g" -e "s|<gid>|$_GID|g" | \
 	$LDAPADDBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
 
 if [ $? -ne 0 ]
@@ -81,6 +96,16 @@ then
 fi
 
 echo "Successfully added user $1 to LDAP" | tee -a "$LOGFILE"
+
+# Create Home dir
+if [ "$CREATEHOMES" == "yes" ] || [ "$CREATEHOMES" == "Yes" ] || [ "$CREATEHOMES" == "YES" ]
+then
+  mkdir -p "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+  chown "$_USER":"$_GID" "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+  chmod 700 "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+  echo "Created home directory for user $_USER" | tee -a "$LOGFILE"
+fi
+
 exit 0
 
 # Ldif info ##################################
@@ -91,8 +116,8 @@ exit 0
 ##uid: <user>
 ##uidNumber: <uid>
 ##gidNumber: <gid>
-##homeDirectory: <homes>/<user>
-##userPassword: 
+##homeDirectory: <home>
+##userPassword: <password>
 ##loginShell: <shell>
 ##gecos: <user>
 ##description: <user>
