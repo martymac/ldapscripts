@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ldapaddusertogroup : adds a memberUid attribute to a POSIX group in LDAP
+#  ldapaddusertogroup : adds a memberUid attribute to a POSIX group in LDAP
 
 #  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
 #
@@ -19,24 +19,24 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 #  USA.
 
-if [ "$1" == "" ] || [ "$2" == "" ]
+if [ "$1" = "" ] || [ "$2" = "" ]
 then
   echo "Usage : $0 <username | uid> <goupname | gid>"
-  exit -1
+  exit 1
 fi
 
 # Read configuration
 if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
 then
   echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
-source /etc/ldapscripts/ldapscripts.conf
+. /etc/ldapscripts/ldapscripts.conf
 
 # Check username : $1
-_UID=`getent passwd "$1" | head -n 1 | cut -d ":" -f 1` # Convert to name any user passed in as name/uid
-if [ "$_UID" == "" ] # User not found
+_UID=`$GETENTPWCMD "$1" | head -n 1 | cut -d ":" -f 1` # Convert to name any user passed in as name/uid
+if [ "$_UID" = "" ] # User not found
 then
   echo "Warning : user $1 not found, using it anyway..." | tee -a "$LOGFILE"
   _UID="$1"
@@ -44,10 +44,10 @@ fi
 
 # Check groupname : $2, must exist in LDAP !
 _GID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixGroup)(!(memberUid=$_UID))(|(cn=$2)(gidNumber=$2)))" cn 2>>"$LOGFILE" | grep "cn: " | head -n 1 | sed -e "s|cn: ||"`
-if [ "$_GID" == "" ] # Group not found
+if [ "$_GID" = "" ] # Group not found
 then
   echo "Group $2 not found (or $_UID already member of $2)" | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
 # Modify group entry
@@ -58,7 +58,7 @@ grep -E '^##' "$0" | sed 's|^##||' | \
 if [ $? -ne 0 ]
 then
   echo "Error adding user $_UID to group $_GID" | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
 echo "Successfully added user $_UID to group $_GID" | tee -a "$LOGFILE"

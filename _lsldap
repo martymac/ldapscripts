@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# _lsldap : does a *big* query on the LDAP directory
+#  _lsldap : does a *big* query on the LDAP directory
 
 #  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
 #
@@ -23,10 +23,10 @@
 if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
 then
   echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
-source /etc/ldapscripts/ldapscripts.conf
+. /etc/ldapscripts/ldapscripts.conf
 
 # Search whole directory as $BINDDN... may be *VERY* long
 $LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL

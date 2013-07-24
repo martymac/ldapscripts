@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ldapsetprimarygroup : modifies the gidNumber of a POSIX user or machine account in LDAP
+#  ldapsetprimarygroup : modifies the gidNumber of a POSIX user or machine account in LDAP
 
 #  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
 #
@@ -19,38 +19,38 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 #  USA.
 
-if [ "$1" == "" ] || [ "$2" == "" ]
+if [ "$1" = "" ] || [ "$2" = "" ]
 then
   echo "Usage : $0 <username | uid> <goupname | gid>"
-  exit -1
+  exit 1
 fi
 
 # Read configuration
 if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
 then
   echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
-source /etc/ldapscripts/ldapscripts.conf
+. /etc/ldapscripts/ldapscripts.conf
 
 # Check username : $1, must exist in LDAP ! Lookup base = global $SUFFIX, to work on machine and user accounts
 _ENTRY=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixAccount)(|(uid=$1)(cn=$1)(uidNumber=$1)))" dn 2>>"$LOGFILE" | grep "dn: " | head -n 1 | sed -e "s|dn: ||"`
-if [ "$_ENTRY" == "" ] # User not found
+if [ "$_ENTRY" = "" ] # User not found
 then
   echo "User $1 not found" | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
 # Check groupname : $2
-_GID=`getent group "$2" | head -n 1 | cut -d ":" -f 3` # Convert to GID any group passed in as name/gid
-if [ "$_GID" == "" ] # Group not found
+_GID=`$GETENTGRCMD "$2" | head -n 1 | cut -d ":" -f 3` # Convert to GID any group passed in as name/gid
+if [ "$_GID" = "" ] # Group not found
 then
   _GID=`echo "$2" | grep '[0-9]\+'` # Check if group is a gid
-  if [ "$_GID" == "" ]
+  if [ "$_GID" = "" ]
   then
     echo "Cannot convert group $2 to gid : group name not found" | tee -a "$LOGFILE"
-    exit -1
+    exit 1
   fi
   echo "Warning : gid $2 not found, using it anyway..." | tee -a "$LOGFILE"
   _GID="$2"
@@ -64,7 +64,7 @@ grep -E '^##' "$0" | sed 's|^##||' | \
 if [ $? -ne 0 ]
 then
   echo "Error setting primary group for user $1 (to group $2)" | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
 echo "Successfully set primary group for user $1 (to group $2)" | tee -a "$LOGFILE"

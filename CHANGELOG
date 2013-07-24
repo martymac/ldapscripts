@@ -1,3 +1,12 @@
+2005/10/01 : ldapscripts 1.3
+  Compatibility rework / code cleaning - the scripts now work on FreeBSD !
+  - no more calls to "source", use . instead
+  - now using "=" instead of "==" in test
+  - now return 1 instead of -1 when an error occurs
+  - added possibility to specify the getent command, so you can use pw instead (for FreeBSD)
+  - added auto-guess for this command if left blank in conf file
+  - splitted the horrible conf file into a real conf file and a "runtime" file
+
 2005/07/15 : ldapscript 1.2
   - applied patch from Vincent Esposito to make sure uid/gid/mid found in LDAP is higher than *START ones
   - small documentation modifications
@@ -8,4 +17,5 @@
   - no more need for backslashes in user home directories and user shell in ldapscripts.conf
   - added support for initializing (randomized) passwords when adding a user.
   - Passwords can also be recorded into a log file when performing a massive user creation (see ldapscripts.conf)
+
 2005/02/07 : ldapscripts 1.0

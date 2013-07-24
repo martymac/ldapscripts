@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ldapaddgroup : adds a POSIX group entry to LDAP
+#  ldapaddgroup : adds a POSIX group entry to LDAP
 
 #  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
 #
@@ -19,30 +19,30 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 #  USA.
 
-if [ "$1" == "" ]
+if [ "$1" = "" ]
 then
   echo "Usage : $0 <groupname> [gid]"
-  exit -1
+  exit 1
 fi
 
 # Read configuration
 if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
 then
   echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
-source /etc/ldapscripts/ldapscripts.conf
+. /etc/ldapscripts/ldapscripts.conf
 
 # Group name
 _GROUP="$1"
 # Compute GID
-if [ "$2" == "" ] # No argument, we must find a correct GID
+if [ "$2" = "" ] # No argument, we must find a correct GID
 then
   # Find latest in LDAP
   _GID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixGroup)' gidNumber 2>>"$LOGFILE" | grep "gidNumber: " | sed -e "s|gidNumber: ||" | uniq | sort -g | tail -n 1`
   # GID not found in LDAP or GID smaller than GIDSTART
-  if [ "$_GID" == "" ] || [ ! "$_GID" -gt "$GIDSTART" ]
+  if [ "$_GID" = "" ] || [ ! "$_GID" -gt "$GIDSTART" ]
   then
     _GID="$GIDSTART"
   fi
@@ -51,10 +51,10 @@ else
   _GID="$2"
 fi
 
-if [ "$_GROUP" == "" ] || [ "$_GID" == "" ]
+if [ "$_GROUP" = "" ] || [ "$_GID" = "" ]
 then
   echo "Error with group $_GROUP (gid : $_GID), exiting..." | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
 grep -E '^##' "$0" | sed 's|^##||' | \
@@ -64,7 +64,7 @@ grep -E '^##' "$0" | sed 's|^##||' | \
 if [ $? -ne 0 ]
 then
   echo "Error adding group $1 to LDAP" | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
 echo "Successfully added group $1 to LDAP" | tee -a "$LOGFILE"

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ldapadduser : adds a POSIX user account to LDAP
+#  ldapadduser : adds a POSIX user account to LDAP
 
 #  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
 #
@@ -19,42 +19,42 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 #  USA.
 
-if [ "$1" == "" ] || [ "$2" == "" ]
+if [ "$1" = "" ] || [ "$2" = "" ]
 then
   echo "Usage : $0 <username> <goupname | gid> [uid]"
-  exit -1
+  exit 1
 fi
 
 # Read configuration
 if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
 then
   echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
-source /etc/ldapscripts/ldapscripts.conf
+. /etc/ldapscripts/ldapscripts.conf
 
 # Username = first argument
 _USER="$1"
 # User GID = second argument
-_GID=`getent group "$2" | head -n 1 | cut -d ":" -f 3` # Convert to GID any group passed in as name/gid
-if [ "$_GID" == "" ] # Group not found
+_GID=`$GETENTGRCMD "$2" | head -n 1 | cut -d ":" -f 3` # Convert to GID any group passed in as name/gid
+if [ "$_GID" = "" ] # Group not found
 then
   _GID=`echo "$2" | grep '[0-9]\+'` # Check if group is a gid
-  if [ "$_GID" == "" ]
+  if [ "$_GID" = "" ]
   then
     echo "Cannot convert group $2 to gid : group name not found" | tee -a "$LOGFILE"
-    exit -1
+    exit 1
   fi
   echo "Warning : gid $2 not found, using it anyway..." | tee -a "$LOGFILE"
 fi
 # Compute UID
-if [ "$3" == "" ] # Not an argument, we must find a correct UID
+if [ "$3" = "" ] # Not an argument, we must find a correct UID
 then
   # Find latest in LDAP (base = global $SUFFIX, because machines and users are both posix accounts)
   _UID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixAccount)' uidNumber 2>>"$LOGFILE" | grep "uidNumber: " | sed -e "s|uidNumber: ||" | uniq | sort -g | tail -n 1`
   # UID not found in LDAP or UID smaller than UIDSTART
-  if [ "$_UID" == "" ] || [ ! "$_UID" -gt "$UIDSTART" ]
+  if [ "$_UID" = "" ] || [ ! "$_UID" -gt "$UIDSTART" ]
   then
     _UID="$UIDSTART"
   fi
@@ -63,10 +63,10 @@ else
   _UID="$3"
 fi
 
-if [ "$_USER" == "" ] || [ "$_UID" == "" ] || [ "$_GID" == "" ]
+if [ "$_USER" = "" ] || [ "$_UID" = "" ] || [ "$_GID" = "" ]
 then
   echo "Error with user $_USER (with uid : $_UID, and gid : $_GID), exiting..." | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
 # Compute homedir
@@ -76,7 +76,7 @@ _HOMEDIR=`echo "$UHOMES" | sed -e "s|%u|$_USER|g"`
 PASSWORDGEN=`echo "$PASSWORDGEN" | sed -e "s|%u|$_USER|g"`
 _PASSWORD=`eval $PASSWORDGEN`
 # Record generated password ?
-if [ "$RECORDPASSWORDS" == "yes" ] || [ "$RECORDPASSWORDS" == "Yes" ] || [ "$RECORDPASSWORDS" == "YES" ]
+if [ "$RECORDPASSWORDS" = "yes" ] || [ "$RECORDPASSWORDS" = "Yes" ] || [ "$RECORDPASSWORDS" = "YES" ]
 then
   echo "$_USER : $_PASSWORD" >> "$PASSWORDFILE"
 fi
@@ -92,13 +92,13 @@ grep -E '^##' "$0" | sed 's|^##||' | \
 if [ $? -ne 0 ]
 then
   echo "Error adding user $1 to LDAP" | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
 echo "Successfully added user $1 to LDAP" | tee -a "$LOGFILE"
 
 # Create Home dir
-if [ "$CREATEHOMES" == "yes" ] || [ "$CREATEHOMES" == "Yes" ] || [ "$CREATEHOMES" == "YES" ]
+if [ "$CREATEHOMES" = "yes" ] || [ "$CREATEHOMES" = "Yes" ] || [ "$CREATEHOMES" = "YES" ]
 then
   mkdir -p "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
   chown "$_USER":"$_GID" "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null

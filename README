@@ -10,9 +10,10 @@ machines in and LDAP directory. They are written in sh and need ldap
 client commands to work correctly (ldapadd, ldapdelete, ldapmodify,
 ldapsearch).
 
-They are designed to be used under GNU/Linux and require several binaries
-that should come with your distro (uuencode, getent, date, grep, sed, cut, 
-expr, which...) ; please make sure this is right before using them !
+They are designed to be used under GNU/Linux or FreeBSD (any other
+UNIX-like should also work) and require several binaries that should 
+come with your OS (uuencode, getent/pw, date, grep, sed, cut, expr, 
+which...) ; please make sure this is right before using them !
 
 Latest version available on http://contribs.martymac.com
 
@@ -30,6 +31,15 @@ Edit /etc/ldapscripts/ldapscripts.conf to configure the ldapscripts.
 
 Then, just type in - e.g. :
 # ldapadduser foo foogroup
+
+Configuring your OpenLDAP server :
+**********************************
+
+Be sure to include these schemas in your slapd.conf :
+
+- core.schema
+- cosine.schema (for the account objectClass)
+- nis.schema (for the posixAccount objectClass)
 
 Using ldapscripts with Samba :
 ******************************
@@ -51,8 +61,9 @@ set primary group script = /usr/local/bin/ldapsetprimarygroup '%u' '%g'
 and make sure sambamachines and sambausers exist before attempting to 
 do a "net rpc vampire"...
 
-Also be sure to have nsswitch / nss_ldap working since the scripts uses
-getent to getch accounts information.
+Also be sure to have your machine using the LDAP server as a posix accounts
+source (e.g. nsswitch / nss_ldap on GNU/Linux) since the scripts uses
+getent (or pw for FreeBSD) to fetch accounts information.
 
 Files :
 *******
@@ -73,20 +84,10 @@ ldapaddmachine : adds a POSIX machine (user$) to LDAP
 ldapaddusertogroup : add a memberUid entry to a POSIX group
 ldapdeleteuser : deletes a POSIX user from LDAP
 
-Ldapscripts on FreeBSD ?
-************************
-
-The ldapscripts don't run on FreeBSD at the moment. The main problem is the
-getent command is not available on FreeBSD. If you wanna run the scripts on
-FreeBSD, just use pw instead of getent. 
-
-I haven't have enough time to patch the scripts to make them work 
-out-of-the-box ! (any contrib welcome ;-))
-
 Author / Licence :
 ******************
 
 These scripts have been written by Ganaël LAPLANCHE (ganael.laplanche@martymac.com)
 and are available within the GPL license (see COPYING for details).
 
-Thanks for using ldapscripts... Any feedback welcome :)
+Thanks for using the ldapscripts... Any feedback welcome :)

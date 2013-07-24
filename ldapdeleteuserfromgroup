@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ldapdeleteuserfromgroup : deletes a memberUid attribute from a POSIX group in LDAP
+#  ldapdeleteuserfromgroup : deletes a memberUid attribute from a POSIX group in LDAP
 
 #  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
 #
@@ -19,30 +19,30 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 #  USA.
 
-if [ "$1" == "" ] || [ "$2" == "" ]
+if [ "$1" = "" ] || [ "$2" = "" ]
 then
   echo "Usage : $0 <username> <goupname | gid>"
-  exit -1
+  exit 1
 fi
 
 # Read configuration
 if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
 then
   echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
-source /etc/ldapscripts/ldapscripts.conf
+. /etc/ldapscripts/ldapscripts.conf
 
 # Set username
 _UID="$1"
 
 # Check groupname : $2, must exist in LDAP !
 _GID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixGroup)(memberUid=$1)(|(cn=$2)(gidNumber=$2)))" cn 2>>"$LOGFILE" | grep "cn: " | head -n 1 | sed -e "s|cn: ||"`
-if [ "$_GID" == "" ] # Group not found
+if [ "$_GID" = "" ] # Group not found
 then
   echo "Group $2 not found (or $1 is not a member of group $2)" | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
 # Modify group entry
@@ -53,7 +53,7 @@ grep -E '^##' "$0" | sed 's|^##||' | \
 if [ $? -ne 0 ]
 then
   echo "Error deleting user $_UID from group $_GID" | tee -a "$LOGFILE"
-  exit -1
+  exit 1
 fi
 
 echo "Successfully deleted user $_UID from group $_GID" | tee -a "$LOGFILE"

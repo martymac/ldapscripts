@@ -40,5 +40,6 @@ then
   echo "Old configuration file found, saved under $ETCDIR/ldapscripts.conf.old"
 fi
 cp ldapscripts.conf "$ETCDIR"
+cp runtime "$ETCDIR"
 
 echo "Ldapscripts are now installed ! See README for more details..."
