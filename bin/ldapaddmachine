@@ -43,8 +43,8 @@ fi
 
 _extractldif | _filterldif | _ldapadd
 
-[ $? -eq 0 ] || end_die "Error adding machine $1 to LDAP"
-end_ok "Successfully added machine $1 to LDAP"
+[ $? -eq 0 ] || end_die "Error adding machine $_USER to LDAP"
+end_ok "Successfully added machine $_USER to LDAP"
 
 # Ldif info ##################################
 ##dn: uid=<user>,<msuffix>,<suffix>
@@ -57,4 +57,4 @@ end_ok "Successfully added machine $1 to LDAP"
 ##homeDirectory: /dev/null
 ##loginShell: /bin/false
 ##gecos: <user>
-##description: <user>
+##description: Machine account

@@ -32,7 +32,7 @@ The ldapscripts are a set of shell (sh) scripts to manage POSIX accounts in an O
 The main requirements are the OpenLDAP client tools (ldapadd, ldapsearch, ldapdelete, ...). Other commands are called in the scripts but shoud come with your distro (sed, grep, cut, ...).
 
 .SH CONFIGURATION
-The main configuration of the ldapscripts is the usually /etc/ldapscripts/ldapscripts.conf file (or /usr/local/etc/ldapscripts/ldapscripts.conf, depending on your system). Modify it to fit your needs before using the scripts. Each script also uses a "runtime" file, usually /etc/ldapscripts/runtime (or /usr/local/etc/ldapscripts/runtime). You don't need to modify this file.
+The main configuration of the ldapscripts is usually the /etc/ldapscripts/ldapscripts.conf file (or /usr/local/etc/ldapscripts/ldapscripts.conf, depending on your system). Modify it to fit your needs before using the scripts. Each script also uses a "runtime" file, usually /etc/ldapscripts/runtime (or /usr/local/etc/ldapscripts/runtime). You don't need to modify this file.
 
 .SH "USING AS STANDALONE TOOLS"
 The scripts can be used as standard command-line tools. Just call the script using correct arguments. Check the man page of the script or call it without any argument to get help.

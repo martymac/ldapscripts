@@ -31,20 +31,21 @@ sed -i.orig -e "s|^_CONFIGFILE=.*|_CONFIGFILE=\"${ETCDIR}/${ETCFILE}\"|g" etc/*
 
 # Script files
 mkdir -p "${BINDIR}" 2>/dev/null
-cp bin/_ldapdeletemachine "${BINDIR}"
-cp bin/_ldaprenamegroup "${BINDIR}"
-cp bin/_ldaprenamemachine "${BINDIR}"
-cp bin/_ldapinit "${BINDIR}"
-cp bin/_lsldap "${BINDIR}"
-cp bin/ldapaddgroup "${BINDIR}"
-cp bin/ldapadduser "${BINDIR}"
-cp bin/ldapdeletegroup "${BINDIR}"
-cp bin/ldapdeleteuserfromgroup "${BINDIR}"
-cp bin/ldapsetprimarygroup "${BINDIR}"
-cp bin/ldapaddmachine "${BINDIR}"
-cp bin/ldapaddusertogroup "${BINDIR}"
-cp bin/ldapdeleteuser "${BINDIR}"
-cp bin/ldaprenameuser "${BINDIR}"
+cp -f bin/_ldapdeletemachine "${BINDIR}"
+cp -f bin/_ldaprenamegroup "${BINDIR}"
+cp -f bin/_ldaprenamemachine "${BINDIR}"
+cp -f bin/_ldapinit "${BINDIR}"
+cp -f bin/_lsldap "${BINDIR}"
+cp -f bin/_ldappasswd "${BINDIR}"
+cp -f bin/ldapaddgroup "${BINDIR}"
+cp -f bin/ldapadduser "${BINDIR}"
+cp -f bin/ldapdeletegroup "${BINDIR}"
+cp -f bin/ldapdeleteuserfromgroup "${BINDIR}"
+cp -f bin/ldapsetprimarygroup "${BINDIR}"
+cp -f bin/ldapaddmachine "${BINDIR}"
+cp -f bin/ldapaddusertogroup "${BINDIR}"
+cp -f bin/ldapdeleteuser "${BINDIR}"
+cp -f bin/ldaprenameuser "${BINDIR}"
 
 # Man pages
 mkdir -p "${MANDIR}"/man1 2>/dev/null
@@ -62,12 +63,12 @@ done
 mkdir -p "${ETCDIR}" 2>/dev/null
 if [ -f "${ETCDIR}/${ETCFILE}" ]
 then
-  mv "${ETCDIR}/${ETCFILE}" "${ETCDIR}/${ETCFILE}.old"
-  echo "Old configuration file found, saved under ${ETCDIR}/${ETCFILE}.old"
+  mv -f "${ETCDIR}/${ETCFILE}" "${ETCDIR}/${ETCFILE}.old"
+  echo "Old configuration file found, saved as ${ETCDIR}/${ETCFILE}.old"
 fi
-cp etc/ldapscripts.conf "${ETCDIR}/${ETCFILE}"
+cp -f etc/ldapscripts.conf "${ETCDIR}/${ETCFILE}"
 
 mkdir -p "${RUNTIMEDIR}" 2>/dev/null
-cp etc/runtime "${RUNTIMEDIR}/${RUNTIMEFILE}"
+cp -f etc/runtime "${RUNTIMEDIR}/${RUNTIMEFILE}"
 
-echo "Ldapscripts are now installed ! See README for more details..."
+echo "The ldapscripts are now installed ! See README for more details..."

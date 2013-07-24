@@ -21,7 +21,7 @@
 
 if [ -z "$1" ] || [ -z "$2" ]
 then
-  echo "Usage : $0 <username> <goupname | gid>"
+  echo "Usage : $0 <username> <groupname | gid>"
   exit 1
 fi
 

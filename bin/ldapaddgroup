@@ -41,8 +41,8 @@ fi
 
 _extractldif | _filterldif | _ldapadd
 
-[ $? -eq 0 ] || end_die "Error adding group $1 to LDAP"
-end_ok "Successfully added group $1 to LDAP"
+[ $? -eq 0 ] || end_die "Error adding group $_GROUP to LDAP"
+end_ok "Successfully added group $_GROUP to LDAP"
 
 # Ldif info
 ##dn: cn=<group>,<gsuffix>,<suffix>

@@ -140,7 +140,8 @@ _filterldif () {
   sed -e "s|<group>|$_GROUP|g" -e "s|<user>|$_USER|g" -e "s|<uid>|$_UID|g" -e "s|<gid>|$_GID|g" \
       -e "s|<suffix>|$SUFFIX|g" -e "s|<_suffix>|$_SUFFIX|g" -e "s|<usuffix>|$USUFFIX|g" -e "s|<_usuffix>|$_USUFFIX|g" \
       -e "s|<msuffix>|$MSUFFIX|g" -e "s|<_msuffix>|$_MSUFFIX|g" -e "s|<gsuffix>|$GSUFFIX|g" -e "s|<_gsuffix>|$_GSUFFIX|g" \
-      -e "s|<home>|$_HOMEDIR|g"  -e "s|<shell>|$USHELL|g" -e "s|<entry>|$_ENTRY|g" 2>>"$LOGFILE"
+      -e "s|<home>|$_HOMEDIR|g"  -e "s|<shell>|$USHELL|g" -e "s|<password>|$_PASSWORD|g" -e "s|<gecos>|$_GECOS|g" \
+      -e "s|<entry>|$_ENTRY|g" 2>>"$LOGFILE"
 }
 
 ### Nsswitch functions

@@ -1,3 +1,14 @@
+2007/01/03 : ldapscripts 1.5
+  - Fixed typos (thanks to Mikael Lammentausta)
+  - Small fixes to the install script
+  - ldapadduser : use $_UID instead of $_USER while chown'ing homedir (thanks to Mikael Lammentausta)
+  - ldapadduser : new option to ask for the gecos (thanks to Mikael Lammentausta)
+  - ldapadduser : new option to copy skeleton files to home directories (thanks to Mikael Lammentausta)
+  - ldapadduser : now skip user's home dir creation if it already exists
+  - ldapadduser/ldapaddmachine : modified account description attributes : set to 'User account' or 'Machine account'
+  - ldapadduser/ldapaddgroup/ldapaddmachine : use $_USER and $_GROUP instead of $1 when possible
+  - New _ldappasswd script to modify a user's password (suggested by Mikael Lammentausta)
+
 2006/01/05 : ldapscripts 1.4
   - More code cleaning !!! Code now clean... (and bug-free ???) - thanks to Madcoder for the help he provided !
   - Removed dependency to slappasswd !!! Using ldappasswd instead (included in the standard ldap-client commands)

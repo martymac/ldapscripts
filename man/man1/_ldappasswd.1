@@ -19,32 +19,39 @@
 .\" ganael.laplanche@martymac.com
 .\" http://contribs.martymac.com
 .\"
-.TH ldapdeleteuserfromgroup 1 "January 1, 2006"
+.TH _ldappasswd 1 "November 1, 2006"
 .LO 1
 
 .SH NAME
-ldapdeleteuserfromgroup \- deletes a memberUid attribute from a POSIX group in LDAP.
+_ldappasswd \- modifies a POSIX user account's password in LDAP.
 
 .SH SYNOPSIS
-.B ldapdeleteuserfromgroup
-.RB <username>
-.RB <groupname | gid>
-
+.B _ldappasswd
+.RB <username | uid>
+.RB [encoded password]
+ 
 .SH OPTIONS
 .TP
-.B <username>
-The name of the user to delete. It can be a machine name (with an ending $) or a user name.
+.B <username | uid>
+The name or uid of the user whose password has to be modified.
 .TP
-.B <groupname | gid>
-The name or the gid of the group that should say goodbye to the user.
+.B [encoded password]
+If specified this way, the password will be copied verbatim into the LDAP directory. If not specified, you will 
+be prompted for a password that will be changed using the ldappasswd(1) command.
 
 .SH "SEE ALSO"
-ldapaddusertogroup(1), ldapsetprimarygroup(1), ldapscripts(5).
+ldapscripts(5).
 
 .SH AVAILABILITY
 The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).
 The latest version of the ldapscripts is available on :
 .B http://contribs.martymac.com
+
+.SH LIMITATIONS
+When used interactively, passwords generated with this command are propagated with the ldappasswd(1) command.
+Thus, the resulting format depends on the 'password-hash' option of your server's slapd.conf(5) file.
+
+You can always force an encoded password (using the hash format of your choice) by specifying it on the command line.
 
 .SH BUGS
 No bug known.

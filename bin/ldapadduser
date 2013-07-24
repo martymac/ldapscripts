@@ -21,7 +21,7 @@
 
 if [ -z "$1" ] || [ -z "$2" ]
 then
-  echo "Usage : $0 <username> <goupname | gid> [uid]"
+  echo "Usage : $0 <username> <groupname | gid> [uid]"
   exit 1
 fi
 
@@ -44,26 +44,47 @@ fi
 # Compute homedir
 _HOMEDIR=`echo "$UHOMES" | sed -e "s|%u|$_USER|g"`
 
+# Ask for a gecos if necessary
+if is_yes "$ASKGECOS"
+then
+  echo -n "Please enter user's full name: "
+  read _GECOS
+else
+  _GECOS="$_USER"
+fi
+
 # Add user to LDAP
 _extractldif | _filterldif | _ldapadd
 
-[ $? -eq 0 ] || end_die "Error adding user $1 to LDAP"
-echo_log "Successfully added user $1 to LDAP"
+[ $? -eq 0 ] || end_die "Error adding user $_USER to LDAP"
+echo_log "Successfully added user $_USER to LDAP"
 
 # Generate the user's password
 _genpassword "$_USER"
 
 # Add the user's password
 _changepassword "$_PASSWORD" "uid=$_USER,$USUFFIX,$SUFFIX"
-[ $? -eq 0 ] && echo_log "Successfully set password for user $1"
+[ $? -eq 0 ] && echo_log "Successfully set password for user $_USER"
 
 # Create Home dir
 if is_yes "$CREATEHOMES"
 then
-  mkdir -p "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
-  chown "$_USER":"$_GID" "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
-  chmod 700 "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
-  echo_log "Successfully created home directory for user $_USER"
+  if [ -e "$_HOMEDIR" ]
+  then
+    echo_log "Skipped home directory creation for user $_USER (already exists)"
+  else
+    # Create home by skel or mkdir
+    if [ -d "$HOMESKEL" ]
+    then
+      cp -PR "$HOMESKEL/" "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+    else
+      mkdir -p "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+    fi
+
+    chmod 700 "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+    chown -R "$_UID":"$_GID" "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+    echo_log "Successfully created home directory for user $_USER"
+  fi
 fi
 
 end_ok
@@ -78,5 +99,5 @@ end_ok
 ##gidNumber: <gid>
 ##homeDirectory: <home>
 ##loginShell: <shell>
-##gecos: <user>
-##description: <user>
+##gecos: <gecos>
+##description: User account
