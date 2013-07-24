@@ -6,6 +6,7 @@ TODO (ideas) :
 - Improve ldapid/ldapgid to dump the whole directory if no argument is given
 - Make the runtime file useable as a shell library : avoid exit in end_* functions
 - Send ldap clients error logs to stdout as well as to logfile
+- Allow use of DNs (instead of short names) as command arguments
 - Make some scripts useable with lower privileges than root :
   - Move ldapid, ldapfinger, ldapsetpasswd, lsldap to bin/ and set them suid
   - Allow common users to use these tools. It will require a kind of privilege separation

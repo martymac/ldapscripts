@@ -24,7 +24,7 @@ PREFIX = /usr/local
 # Identity
 SHELL= /bin/sh
 NAME = ldapscripts
-SUFFIX = rc1
+#SUFFIX = -devel
 VERSION = 2.0.0
 
 # Default installation paths

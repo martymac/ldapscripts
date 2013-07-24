@@ -1,4 +1,4 @@
-2011/??/?? : ldapscripts 2.0.0
+2011/04/18 : ldapscripts 2.0.0
   - Next user and machine IDs now evolve independently (Debian bug #609148) :
       - they are guessed from their respective suffix
       - they are checked to avoid duplicates (against local and LDAP accounts)
