@@ -1,3 +1,14 @@
+2007/09/03 : ldapscripts 1.7
+  - Fixed several typos and bugs
+  - _ldapinit : new options : '-r' and '-s' to create only the root dn ('-r'), or regular OUs ('-s')
+    - [internals] Added the ability to select depth when using _extractldif()
+    - [internals] New is_integer function
+  - _lsldap : new options : '-u', '-g' and '-m', to list only 'u'ser, 'g'roup or 'm'achine entries
+  - New _ldapmodify{user,group,machine} interactive scripts to edit entries
+    - Added a new $TMPDIR configuration variable (necessary for the new scripts)
+    - Added _ldapmodify{user,group,machine}(1) manpages
+  - Now bundled with a brand-new Makefile (old install script no more available)
+
 2007/04/20 : ldapscripts 1.6
   - Fixed typos
   - internal _ldapsearch() improved

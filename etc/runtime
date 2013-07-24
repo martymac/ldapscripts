@@ -37,7 +37,14 @@ is_no () {
 # Input : string to test ($1)
 # Output : true or false
 is_uri () {
-  echo "$1" | grep -qi '://'
+  echo "$1" | grep -q '://'
+}
+
+# Tests a string
+# Input : string to test ($1)
+# Output : true or false
+is_integer () {
+  echo "$1" | grep -qE '^[0-9]+$'
 }
 
 # Logs a string to $LOGFILE
@@ -129,10 +136,18 @@ _ldapdelete () {
 }
 
 # Extracts LDIF information from $0 (the current script itself)
-# Input : nothing
+# selecting lines beginning with $1 occurrences of '#'
+# Input : depth ($1)
 # Output : extracted LDIF data (stdout)
 _extractldif () {
-  grep -E '^##' "$0" | sed -e 's|^##||' 2>>"$LOGFILE"
+  if [ -z "$1" ] || ! is_integer "$1"
+  then
+    echo_log "Warning : invalid depth supplied to _extractldif(), using default (2)..."
+    _EXTRACTDEPTH='2'
+  else
+    _EXTRACTDEPTH="$1"
+  fi
+  grep -E "^#{$_EXTRACTDEPTH}[^#]*$" "$0" | sed -e 's|^#*||' 2>>"$LOGFILE"
 }
 
 # Filters LDIF information
@@ -296,6 +311,7 @@ fi
 UHOMES=${UHOMES:-"/dev/null"}
 USHELL=${USHELL:-"/bin/false"}
 LOGFILE=${LOGFILE:-"/var/log/ldapscripts.log"}
+TMPDIR=${TMPDIR:-"/tmp"}
 
 # Check password file if password recording set
 if is_yes "$RECORDPASSWORDS"

@@ -27,9 +27,21 @@ _ldapinit \- initializes the LDAP directory with a minimal tree.
 
 .SH SYNOPSIS
 .B _ldapinit
+.RB [[-h] | [-r | -s]]
+
+.SH OPTIONS
+.TP
+.B [-h]
+This help.
+.TP
+.B [-r]
+Create only the root DN.
+.TP
+.B [-s]
+Skip root DN creation (create only regular OUs).
 
 .SH "SEE ALSO"
-_lsldap(1), ldapscripts(5).
+_lsldap(1), _ldapfinger(1), ldapscripts(5).
 
 .SH AVAILABILITY
 The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).

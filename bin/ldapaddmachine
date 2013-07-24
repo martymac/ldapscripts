@@ -46,7 +46,7 @@ if [ -n "$MTEMPLATE" ] && [ -r "$MTEMPLATE" ]
 then
   _getldif="cat $MTEMPLATE"
 else
-  _getldif="_extractldif"
+  _getldif="_extractldif 2"
 fi
 
 # Add user to LDAP

@@ -37,7 +37,7 @@ _findentry "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))"
 _grouptogid "$2"
 
 # Modify user entry
-_extractldif | _filterldif | _ldapmodify
+_extractldif 2 | _filterldif | _ldapmodify
 
 [ $? -eq 0 ] || end_die "Error setting primary group for user $1 (to group $2)"
 end_ok "Successfully set primary group for user $1 (to group $2)"

@@ -30,4 +30,5 @@ _RUNTIMEFILE="/etc/ldapscripts/runtime"
 . "$_RUNTIMEFILE"
 
 # Find and display the entry
-_ldapsearch "$SUFFIX" "(|(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1))))"
+_ldapsearch "$SUFFIX" "(|(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1))))" || end_die "No entry found"
+end_ok

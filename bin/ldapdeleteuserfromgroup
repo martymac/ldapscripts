@@ -37,7 +37,7 @@ _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$1)(|
 [ -z "$_GID" ] && end_die "Group $2 not found (or $1 is not a member of group $2)"
 
 # Modify group entry
-_extractldif | _filterldif | _ldapmodify
+_extractldif 2 | _filterldif | _ldapmodify
 
 [ $? -eq 0 ] || end_die "Error deleting user $_UID from group $_GID"
 end_ok "Successfully deleted user $_UID from group $_GID"

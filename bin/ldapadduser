@@ -58,7 +58,7 @@ if [ -n "$UTEMPLATE" ] && [ -r "$UTEMPLATE" ]
 then
   _getldif="cat $UTEMPLATE"
 else
-  _getldif="_extractldif"
+  _getldif="_extractldif 2"
 fi
 
 # Add user to LDAP

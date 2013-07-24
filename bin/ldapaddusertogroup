@@ -37,7 +37,7 @@ _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(!(memberUid=$_U
 [ -z "$_GID" ] && end_die "Group $2 not found (or $_UID already member of $2)"
 
 # Modify group entry
-_extractldif | _filterldif | _ldapmodify
+_extractldif 2 | _filterldif | _ldapmodify
 
 [ $? -eq 0 ] || end_die "Error adding user $_UID to group $_GID"
 end_ok "Successfully added user $_UID to group $_GID"

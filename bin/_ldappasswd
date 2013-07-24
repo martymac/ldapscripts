@@ -50,7 +50,7 @@ then
 else # Have to use the *encoded* password given on the command line
   # Use LDIF info to modify the password
   _PASSWORD="$2"
-  _extractldif | _filterldif | _ldapmodify
+  _extractldif 2 | _filterldif | _ldapmodify
   [ $? -eq 0 ] || end_die "Error setting encoded password for user $_ENTRY"
   end_ok "Successfully set encoded password for user $_ENTRY"
 fi

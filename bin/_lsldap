@@ -19,10 +19,32 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 #  USA.
 
+# WARNING : this script searches the whole directory as $BINDDN... 
+# It may be *VERY* long and return a limited number of entries
+# Always use slapcat to backup your directory !!!
+
+if [ "$1" = "-h" ]
+then
+  echo "Usage : $0 [[-h] | [-u | -g | -m]]"
+  exit 1
+fi
+
 # Source runtime file
 _RUNTIMEFILE="/etc/ldapscripts/runtime"
 . "$_RUNTIMEFILE"
 
-# Search whole directory as $BINDDN... may be *VERY* long and return a limited number of entries
-# Use slapcat to backup your directory !
-_ldapsearch "$SUFFIX"
+case "$1" in
+  "-u")
+    _ldapsearch "$USUFFIX,$SUFFIX" "(objectClass=posixAccount)" || end_die "No entry found"
+    ;;
+  "-g")
+    _ldapsearch "$GSUFFIX,$SUFFIX" "(objectClass=posixGroup)" || end_die "No entry found"
+    ;;
+  "-m")
+    _ldapsearch "$MSUFFIX,$SUFFIX" "(objectClass=posixAccount)" || end_die "No entry found"
+    ;;
+  *)
+    _ldapsearch "$SUFFIX" || end_die "No entry found"
+    ;;
+esac
+end_ok

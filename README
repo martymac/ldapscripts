@@ -19,14 +19,22 @@ Latest version available on http://contribs.martymac.com
 Installing and configuring the ldapscripts :
 ********************************************
 
-To install the scripts, just edit the install file to 
-set up the installation directories, then type in :
-# ./install
+To install the scripts, just type in :
+# make install
+or, to defined another installation directory :
+# make PREFIX=/target/directory install
+
+Use 'make help' for more options.
 
 All the scripts will be copied (by default) to /usr/local/bin and 
-ldapscripts.conf will be copied into /etc/ldapscripts.
+ldapscripts.conf will be copied to /usr/local/etc/ldapscripts.
 
-Once installed, edit /etc/ldapscripts/ldapscripts.conf to 
+Keep in mind that the scripts are installed with quite restrictive rights
+(because you will have to specify you LDAP password as clear-text in the
+configuration file). Just use group rights or ACLs (if they are enabled
+on your system) to make the things work...
+
+Once installed, edit /usr/local/etc/ldapscripts/ldapscripts.conf to 
 configure the ldapscripts.
 
 Then, just type in - e.g. :
@@ -71,39 +79,51 @@ getent (or pw for FreeBSD) to fetch accounts information.
 Files :
 *******
 
-Various files :
+* Various files :
 
 README : this file !
+COPYING : the GPLv2 (or later) license
 CHANGELOG : the changelog file, of course
 VERSION : the current version of the ldapscripts
-COPYING : the GPLv2 license
 TODO : ideas, remaining work
-ldapscripts.conf : configuration file
-runtime : runtime file used by the scripts (contains functions, etc...)
-install : installation script
+Makefile : installation Makefile
+
+* Man pages :
+
 man/* : man pages
 
-Scripts that can be used in Samba's configuration file (smb.conf) :
+* Configuration files :
 
-ldapaddgroup : adds a POSIX group to LDAP
-ldapadduser : adds a POSIX user to LDAP
-ldapdeletegroup : deletes a POSIX group from LDAP
-ldapdeleteuserfromgroup : deletes a memberUid entry from a POSIX group
-ldapsetprimarygroup : sets gidNumber of a POSIX user or machine account
-ldapaddmachine : adds a POSIX machine (user$) to LDAP
-ldapaddusertogroup : add a memberUid entry to a POSIX group
-ldapdeleteuser : deletes a POSIX user from LDAP
-ldaprenameuser : renames a POSIX user account in LDAP
+etc/ldapscripts.conf : configuration file
+etc/runtime : runtime file used by the scripts (contains functions, etc...)
+etc/ldapadduser.template.sample : user LDIF template file
+etc/ldapaddgroup.template.sample : group LDIF template file
+etc/ldapaddmachine.template.sample : machine LDIF template file
 
-Additional (useful) scripts not used by Samba (those beginning with a "_") :
+* Scripts that can be used in Samba's configuration file (smb.conf) :
 
-_ldapdeletemachine : deletes a POSIX machine account in LDAP
-_ldapinit : initializes the LDAP tree with a minimal tree
-_lsldap : performs a *big* recursive query on the LDAP server from the root dn
-_ldaprenamemachine : renames a POSIX machine account in LDAP
-_ldaprenamegroup : renames a POSIX group in LDAP
-_ldappasswd : modifies a POSIX user account's password in LDAP
-_ldapfinger : displays a user/machine/group POSIX account's details
+bin/ldapaddgroup : adds a POSIX group to LDAP
+bin/ldapadduser : adds a POSIX user to LDAP
+bin/ldapdeletegroup : deletes a POSIX group from LDAP
+bin/ldapdeleteuserfromgroup : deletes a memberUid entry from a POSIX group
+bin/ldapsetprimarygroup : sets gidNumber of a POSIX user or machine account
+bin/ldapaddmachine : adds a POSIX machine (user$) to LDAP
+bin/ldapaddusertogroup : add a memberUid entry to a POSIX group
+bin/ldapdeleteuser : deletes a POSIX user from LDAP
+bin/ldaprenameuser : renames a POSIX user account in LDAP
+
+* Additional (useful) scripts not used by Samba (those beginning with a "_") :
+
+bin/_ldapdeletemachine : deletes a POSIX machine account in LDAP
+bin/_ldapinit : initializes the LDAP tree with a minimal tree
+bin/_lsldap : performs a *big* recursive query on the LDAP server from the root dn
+bin/_ldapmodifyuser : modifies a POSIX user account in LDAP interactively
+bin/_ldapmodifymachine : modifies a POSIX machine account in LDAP interactively
+bin/_ldapmodifygroup : modifies a POSIX group account in LDAP interactively
+bin/_ldaprenamemachine : renames a POSIX machine account in LDAP
+bin/_ldaprenamegroup : renames a POSIX group in LDAP
+bin/_ldappasswd : modifies a POSIX user account's password in LDAP
+bin/_ldapfinger : displays a user/machine/group POSIX account's details
 
 Author / Licence :
 ******************

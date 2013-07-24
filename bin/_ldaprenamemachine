@@ -21,7 +21,7 @@
 
 if [ -z "$1" ] || [ -z "$2" ]
 then
-  echo "Usage : $0 <old machinename with ending $ | uid> <new machinename with ending $>"
+  echo "Usage : $0 <old machinename with ending \$ | uid> <new machinename with ending \$>"
   exit 1
 fi
 
@@ -35,7 +35,7 @@ _findentry "$MSUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(uid=$2))"
 
 # Find src machinename : $1 must exist in LDAP !
 _findentry "$MSUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))"
-[ -z "$_ENTRY" ] && end_die "Machine $1 not found in LDAP"
+[ -z "$_ENTRY" ] && end_die "Machine $1 not found in LDAP (missing ending \$ ?)"
 
 # Rename entry
 _ldaprename "$_ENTRY" "uid=$2" || end_die "Error renaming machine $_ENTRY to $2 in LDAP"
