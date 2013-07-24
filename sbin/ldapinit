@@ -31,10 +31,10 @@ _RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
 . "$_RUNTIMEFILE"
 
 # Clean up suffix info
-_SUFFIX=`echo $SUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
-_USUFFIX=`echo $USUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
-_GSUFFIX=`echo $GSUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
-_MSUFFIX=`echo $MSUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
+_SUFFIX=$(echo $SUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2)
+_USUFFIX=$(echo $USUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2)
+_GSUFFIX=$(echo $GSUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2)
+_MSUFFIX=$(echo $MSUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2)
 
 # Whole operation result
 _RESULT=0

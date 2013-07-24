@@ -13,7 +13,7 @@ query your LDAP directory : ldapfinger, ldapid, lsldap (...).
 
 They are designed to be used under GNU/Linux or FreeBSD (any other
 recent UNIX-like should also work) and require several binaries that should 
-come with your OS (uuencode, getent/pw, date, grep, sed, cut, expr...).
+come with your OS (uuencode, getent/pw, date, grep, sed, cut...).
 
 Latest version available on http://contribs.martymac.org
 

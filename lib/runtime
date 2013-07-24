@@ -135,11 +135,11 @@ mktempf () {
   # Avoid creating two temporary files (must have been released before)
   [ -n "$_TMPFILE" ] && end_die "Error allocating temporary file $_TMPFILE"
   # Name temp file
-  _TMPFILE="$TMPDIR/`basename $0`.`date '+%Y%m%d-%H%M%S'`.$$.`head -c4 /dev/random | od -t u4 | head -n 1 | awk '{print $2}'`"
+  _TMPFILE="$TMPDIR/$(basename $0).$(date '+%Y%m%d-%H%M%S').$$.$(head -c4 /dev/random | od -t u4 | head -n 1 | awk '{print $2}')"
   # Catch CTRL-C to remove $_TMPFILE
   trap 'rm -f "$_TMPFILE" 2>/dev/null ; end_die "Interrupted - Removing temporary file $_TMPFILE"' 2
   # Create temp file
-  _TMPMASK=`umask`
+  _TMPMASK=$(umask)
   umask 0077
   touch "$_TMPFILE" 2>/dev/null || end_die "Error creating temporary file $_TMPFILE"
   umask "$_TMPMASK"
@@ -334,17 +334,17 @@ _askattrs () {
   mktempf
 
   # Backup STDIN
-  _STDIN=`cat`
+  _STDIN=$(cat)
 
   # Loop through STDIN and ask for <ask> values
   # to generate the sed filter ($_TMPFILE)
   _I=1
-  _LINES=`echo $_STDIN | wc -l`
+  _LINES=$(echo $_STDIN | wc -l)
   _CURRENT="unknown"
   while [ $_I -le $_LINES ]
   do
     # Extract current line
-    _LINE=`echo $_STDIN | sed -n "${_I}p"`
+    _LINE=$(echo $_STDIN | sed -n "${_I}p")
 
     # Keep current DN
     if echo "$_LINE" | grep -qi '^dn: '
@@ -356,14 +356,14 @@ _askattrs () {
     if echo "$_LINE" | grep -qiE '^[^: ]+: .*<ask>'
     then
       # Ask for attribute
-      _ATTRNAME=`echo "$_LINE" | cut -d ':' -f 1`
+      _ATTRNAME=$(echo "$_LINE" | cut -d ':' -f 1)
       echo -n "[$_CURRENT] Enter value for \"$_ATTRNAME\" : " 1>&2
       read _ATTRVAL < /dev/tty
       # Generate sed filter
       echo "${_I}s|<ask>|$_ATTRVAL|" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
     fi
 
-    _I=`expr $_I + 1`
+    _I=$(($_I + 1))
   done
 
   # Use filter file
@@ -428,137 +428,168 @@ _b64decode () {
 
 # Converts to gid any group passed in as name/gid
 # Input : the name or gid to convert ($1)
-# Output : the result of the conversion ($_GID)
+# Output : the result of the conversion or "" if not found (stdout)
 _grouptogid () {
   [ -z "$1" ] && end_die "_grouptogid : missing argument"
   # Try local resolution
-  _GID=`$GETENTGRCMD "$1" 2>/dev/null | head -n 1 | cut -d ":" -f 3`
-  if [ -z "$_GID" ]
+  _TMPGID=$(eval $GETENTGRCMD "$1" 2>/dev/null | head -n 1 | cut -d ":" -f 3)
+  if [ -z "$_TMPGID" ]
   then
     # Try asking LDAP
     # As we are working with posixGroup attributes (cn, gidNumber) and using RFC 2307bis,
     # looking for posixGroup objectClasses is sufficient (looking for more specific $GCLASS may miss posixGroup-only entries).
-    _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))" gidNumber | grep "gidNumber: " | head -n 1 | sed "s|gidNumber: ||"`
-    if [ -z "$_GID" ]
-    then
-      end_die "Cannot resolve group $1 to gid : not found"
-    fi
+    _TMPGID=$(_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))" gidNumber | grep "gidNumber: " | head -n 1 | sed "s|gidNumber: ||")
   fi
+  echo "$_TMPGID"
+  unset _TMPGID
 }
 
 # Converts to name any group passed in as name/gid
 # Input : the name or gid to convert ($1)
-# Output : the result of the conversion ($_GID)
+# Output : the result of the conversion or "" if not found (stdout)
 _gidtogroup () {
   [ -z "$1" ] && end_die "_gidtogroup : missing argument"
   # Try local resolution
-  _GID=`$GETENTGRCMD "$1" 2>/dev/null | head -n 1 | cut -d ":" -f 1`
-  if [ -z "$_GID" ]
+  _TMPGID=$(eval $GETENTGRCMD "$1" 2>/dev/null | head -n 1 | cut -d ":" -f 1)
+  if [ -z "$_TMPGID" ]
   then
     # Try asking LDAP
     # As we are working with posixGroup attributes (cn, gidNumber) and using RFC 2307bis,
     # looking for posixGroup objectClasses is sufficient (looking for more specific $GCLASS may miss posixGroup-only entries).
-    _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))" cn | grep "cn: " | head -n 1 | sed "s|cn: ||"`
-    if [ -z "$_GID" ]
-    then
-      end_die "Cannot resolve gid $1 to group : not found"
-    fi
+    _TMPGID=$(_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))" cn | grep "cn: " | head -n 1 | sed "s|cn: ||")
   fi
+  echo "$_TMPGID"
+  unset _TMPGID
 }
 
 # Converts to uid any user passed in as name/uid
 # Input : the name or uid to convert ($1)
-# Output : the result of the conversion ($_UID)
+# Output : the result of the conversion or "" if not found (stdout)
 _usertouid () {
   [ -z "$1" ] && end_die "_usertouid : missing argument"
   # Try local resolution
-  _UID=`$GETENTPWCMD "$1" 2>/dev/null | head -n 1 | cut -d ":" -f 3`
-  if [ -z "$_UID" ]
+  _TMPUID=$(eval $GETENTPWCMD "$1" 2>/dev/null | head -n 1 | cut -d ":" -f 3)
+  if [ -z "$_TMPUID" ]
   then
     # Try asking LDAP
-    _UID=`_ldapsearch "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))" uidNumber | grep "uidNumber: " | head -n 1 | sed "s|uidNumber: ||"`
-    if [ -z "$_UID" ]
-    then
-      end_die "Cannot resolve user $1 to uid : not found"
-    fi
+    _TMPUID=$(_ldapsearch "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))" uidNumber | grep "uidNumber: " | head -n 1 | sed "s|uidNumber: ||")
   fi
+  echo "$_TMPUID"
+  unset _TMPUID
 }
 
 # Converts to name any user passed in as name/uid
 # Input : the name or uid to convert ($1)
-# Output : the result of the conversion ($_UID)
+# Output : the result of the conversion or "" if not found (stdout)
 _uidtouser () {
   [ -z "$1" ] && end_die "_uidtouser : missing argument"
   # Try local resolution
-  _UID=`$GETENTPWCMD "$1" 2>/dev/null | head -n 1 | cut -d ":" -f 1`
-  if [ -z "$_UID" ]
+  _TMPUID=$(eval $GETENTPWCMD "$1" 2>/dev/null | head -n 1 | cut -d ":" -f 1)
+  if [ -z "$_TMPUID" ]
   then
     # Try asking LDAP
-    _UID=`_ldapsearch "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))" uid | grep "uid: " | head -n 1 | sed "s|uid: ||"`
-    if [ -z "$_UID" ]
-    then
-      end_die "Cannot resolve uid $1 to user : not found"
-    fi
+    _TMPUID=$(_ldapsearch "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))" uid | grep "uid: " | head -n 1 | sed "s|uid: ||")
   fi
+  echo "$_TMPUID"
+  unset _TMPUID
 }
 
 # Converts to LDAP DN any user passed in as name/uid
 # Input : the name or uid to convert ($1)
-# Output : the result of the conversion ($_UDN)
+# Output : the result of the conversion or "" if not found (stdout)
 _uidtodn () {
   [ -z "$1" ] && end_die "_uidtodn : missing argument"
-  _UDN=`_ldapsearch "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))" dn | grep "dn: " | head -n 1 | sed "s|dn: ||"`
-  if [ -z "$_UDN" ]
-  then
-    end_die "Cannot resolve uid $1 to DN : not found"
-  fi
+  _TMPUDN=$(_ldapsearch "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))" dn | grep "dn: " | head -n 1 | sed "s|dn: ||")
+  echo "$_TMPUDN"
+  unset _TMPUDN
 }
 
 ### LDAP advanced functions
 
-# Finds the last group id used in LDAP
+# Finds the next useable group ID
 # Input : nothing
-# Output : the last gid used + 1 (so the first useable gid) ($_GID)
-_findlastgroup () {
+# Output : the first free ID found starting from $GIDSTART (stdout)
+_findnextgid () {
   # As we are looking for the last gidNumber of all group entry types and using RFC 2307bis,
   # looking for posixGroup objectClasses is sufficient (looking for more specific $GCLASS may miss posixGroup-only entries).
-  _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" '(objectClass=posixGroup)' gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||" | uniq | sort -n | tail -n 1`
-  if [ -z "$_GID" ] || [ ! "$_GID" -gt "$GIDSTART" ]
+  _NEXTGID=$(_ldapsearch "$GSUFFIX,$SUFFIX" '(objectClass=posixGroup)' gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||" | uniq | sort -n | tail -n 1)
+  if [ -z "$_NEXTGID" ] || [ "$_NEXTGID" -lt "$GIDSTART" ]
   then
-    _GID="$GIDSTART"
+    _NEXTGID="$GIDSTART"
+  else
+    _NEXTGID=$(($_NEXTGID + 1))
   fi
-  _GID=`expr "$_GID" + 1`
+
+  # Is this ID free ?
+  _TMPGID=$(_gidtogroup "$_NEXTGID")
+  while [ -n "$_TMPGID" ]
+  do
+    _NEXTGID=$(($_NEXTGID + 1))
+    _TMPGID=$(_gidtogroup "$_NEXTGID")
+  done
+
+  unset _TMPGID
+  echo "$_NEXTGID"
+  unset _NEXTGID
 }
 
-# Finds the last machine id used in LDAP
+# Finds the next useable machine ID
 # Input : nothing
-# Output : the last machine id used + 1 (so the first useable machine id) ($_UID)
-_findlastmachine () {
-  _UID=`_ldapsearch "$SUFFIX" '(objectClass=posixAccount)' uidNumber | grep "uidNumber: " | sed "s|uidNumber: ||" | uniq | sort -n | tail -n 1`
-  if [ -z "$_UID" ] || [ ! "$_UID" -gt "$MIDSTART" ]
+# Output : the first free ID found starting from $MIDSTART (stdout)
+_findnextmid () {
+  # Note : adding a more specific filter such as '(uid=*$)' may miss non-machine (but POSIX)
+  # entries here and while we are not interested in them, we still want to avoid ID conflicts
+  _NEXTMID=$(_ldapsearch "$MSUFFIX,$SUFFIX" '(objectClass=posixAccount)' uidNumber | grep "uidNumber: " | sed "s|uidNumber: ||" | uniq | sort -n | tail -n 1)
+  if [ -z "$_NEXTMID" ] || [ "$_NEXTMID" -lt "$MIDSTART" ]
   then
-    _UID="$MIDSTART"
+    _NEXTMID="$MIDSTART"
+  else
+    _NEXTMID=$(($_NEXTMID + 1))
   fi
-  _UID=`expr "$_UID" + 1`
+
+  # Is this ID free ?
+  _TMPMID=$(_uidtouser "$_NEXTMID")
+  while [ -n "$_TMPMID" ]
+  do
+    _NEXTMID=$(($_NEXTMID + 1))
+    _TMPMID=$(_uidtouser "$_NEXTMID")
+  done
+
+  unset _TMPMID
+  echo "$_NEXTMID"
+  unset _NEXTMID
 }
 
-# Finds the last user id used in LDAP
+# Finds the next useable user ID
 # Input : nothing
-# Output : the last user id used + 1 (so the first useable user id) ($_UID)
-_findlastuser () {
-  _UID=`_ldapsearch "$SUFFIX" '(objectClass=posixAccount)' uidNumber | grep "uidNumber: " | sed "s|uidNumber: ||" | uniq | sort -n | tail -n 1`
-  if [ -z "$_UID" ] || [ ! "$_UID" -gt "$UIDSTART" ]
+# Output : the first free ID found starting from $UIDSTART (stdout)
+_findnextuid () {
+  _NEXTUID=$(_ldapsearch "$USUFFIX,$SUFFIX" '(objectClass=posixAccount)' uidNumber | grep "uidNumber: " | sed "s|uidNumber: ||" | uniq | sort -n | tail -n 1)
+  if [ -z "$_NEXTUID" ] || [ "$_NEXTUID" -lt "$UIDSTART" ]
   then
-    _UID="$UIDSTART"
+    _NEXTUID="$UIDSTART"
+  else
+    _NEXTUID=$(($_NEXTUID + 1))
   fi
-  _UID=`expr "$_UID" + 1`
+
+  # Is this ID free ?
+  _TMPUID=$(_uidtouser "$_NEXTUID")
+  while [ -n "$_TMPUID" ]
+  do
+    _NEXTUID=$(($_NEXTUID + 1))
+    _TMPUID=$(_uidtouser "$_NEXTUID")
+  done
+
+  unset _TMPUID
+  echo "$_NEXTUID"
+  unset _NEXTUID
 }
 
 # Finds a particular entry in the LDAP directory
 # Input : base ($1), filter ($2)
 # Output : the dn of the first matching entry found ($_ENTRY)
 _findentry () {
-  _ENTRY=`_ldapsearch "$1" "$2" dn | grep "dn: " | head -n 1 | sed "s|dn: ||"`
+  _ENTRY=$(_ldapsearch "$1" "$2" dn | grep "dn: " | head -n 1 | sed "s|dn: ||")
 }
 
 # Get a particular attribute from LDAP
@@ -568,11 +599,11 @@ _findentry () {
 _getattribute () {
   _B64="NO"
   # Get raw attribute
-  _ATTRIBUTE=`_ldapsearch "$1" "" "$2" | grep "$2:\{1,2\} " | head -n 1`
+  _ATTRIBUTE=$(_ldapsearch "$1" "" "$2" | grep "$2:\{1,2\} " | head -n 1)
   # Is it Base64 encoded ?
   is_b64 "$_ATTRIBUTE" && _B64="YES"
   # Get attribute value
-  _ATTRIBUTE=`echo "$_ATTRIBUTE" | sed "s|$2:\{1,2\} ||"`
+  _ATTRIBUTE=$(echo "$_ATTRIBUTE" | sed "s|$2:\{1,2\} ||")
 }
 
 ### Other functions ###
@@ -604,8 +635,8 @@ _genpassword () {
   then
     :
   else
-    PASSWORDGEN=`echo "$PASSWORDGEN" | sed "s|%u|$1|g"`
-    [ -n "$PASSWORDGEN" ] && _PASSWORD=`eval $PASSWORDGEN`
+    PASSWORDGEN=$(echo "$PASSWORDGEN" | sed "s|%u|$1|g")
+    [ -n "$PASSWORDGEN" ] && _PASSWORD=$(eval $PASSWORDGEN)
   fi
 }
 
@@ -675,7 +706,7 @@ fi
 [ ! -e /dev/random ] && end_die "You need a /dev/random special file to run these scripts"
 
 # Set USER variable to the user's login name (do not trust current $USER value)
-USER=`logname 2>/dev/null`
+USER=$(logname 2>/dev/null)
 [ -z "$USER" ] && end_die 'Could not guess current user'
 
 # Check for bindpwd file if necessary
@@ -746,7 +777,7 @@ fi
 # Guess what kind of getent command to use
 if [ -z "$GETENTPWCMD" ] || [ -z "$GETENTGRCMD" ]
 then
-  case `uname` in
+  case $(uname) in
     Linux*)
       GETENTPWCMD="getent passwd"
       GETENTGRCMD="getent group"
@@ -763,4 +794,4 @@ then
 fi
 
 # Record command call into logfile
-log_only "`date '+%b %d %H:%M:%S'` `uname -n | sed 's|\..*$||'` ldapscripts: `basename $0`($USER): $0 $*"
+log_only "$(date '+%b %d %H:%M:%S') $(uname -n | sed 's|\..*$||') ldapscripts: $(basename $0)($USER): $0 $*"

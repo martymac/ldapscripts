@@ -81,9 +81,9 @@ case "$1" in
     _SHELL=${_ATTRIBUTE:-""}
     _getattribute "$_ENTRY" "userPassword"
     _PASSWD=${_ATTRIBUTE:-""}
-    is_yes "$_B64" && _PASSWD=`echo -n $_PASSWD | _b64decode | _utf8decode`
+    is_yes "$_B64" && _PASSWD=$(echo -n $_PASSWD | _b64decode | _utf8decode)
     # Remove leading encoding scheme
-    _PASSWD=`echo $_PASSWD | sed "s|{.*}||"`
+    _PASSWD=$(echo $_PASSWD | sed "s|{.*}||")
     # Prepare output
     _OUTPUT="$_UID:$_PASSWD:$_UIDNUMBER:$_PRIMARYGID::0:0"
     _OUTPUT="$_OUTPUT:$_GECOS:$_HOMEDIR:$_SHELL"
@@ -91,26 +91,28 @@ case "$1" in
   *)
     # Standard display requested (current user)
     # Compute additional attribute : primary group name
-    _gidtogroup "$_PRIMARYGID"
-    _PRIMARYGROUP="$_GID"
+    _PRIMARYGROUP=$(_gidtogroup "$_PRIMARYGID")
+    [ -z "$_PRIMARYGROUP" ] && end_die "Cannot resolve gid $_PRIMARYGID to group : not found"
     # Prepare output
     _OUTPUT="uid=$_UIDNUMBER($_UID) gid=$_PRIMARYGID($_PRIMARYGROUP)"
     _OUTPUT="$_OUTPUT groups=$_PRIMARYGID($_PRIMARYGROUP)"
     # Get secondary groups (posixGroup)
-    _SECONDARYGIDS=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$_UID))" gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||"`
+    _SECONDARYGIDS=$(_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$_UID))" gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||")
     for _SECONDARYGID in $_SECONDARYGIDS
     do
-      _gidtogroup "$_SECONDARYGID"
+      _GID=$(_gidtogroup "$_SECONDARYGID")
+      [ -z "$_GID" ] && end_die "Cannot resolve gid $_SECONDARYGID to group : not found"
       _OUTPUT="$_OUTPUT,$_SECONDARYGID($_GID)"
     done
     # Get member groups (groupOfNames, groupOfUniqueNames)
     if [ "$GCLASS" != "posixGroup" ]
     then
-      _MEMBERGIDS=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)($_GMEMBERATTR=$_ENTRY))" gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||"`
+      _MEMBERGIDS=$(_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)($_GMEMBERATTR=$_ENTRY))" gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||")
       _FIRSTPASS=""
       for _MEMBERGID in $_MEMBERGIDS
       do
-        _gidtogroup "$_MEMBERGID"
+        _GID=$(_gidtogroup "$_MEMBERGID")
+        [ -z "$_GID" ] && end_die "Cannot resolve gid $_MEMBERGID to group : not found"
         if [ -z "$_FIRSTPASS" ]
         then
           _OUTPUT="$_OUTPUT groups(member)=$_MEMBERGID($_GID)"

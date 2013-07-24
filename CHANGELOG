@@ -1,3 +1,36 @@
+2011/??/?? : ldapscripts 2.0.0
+  - Next user and machine IDs now evolve independently (Debian bug #609148) :
+      - they are guessed from their respective suffix
+      - they are checked to avoid duplicates (against local and LDAP accounts)
+    LDAP IDs are not re-used, except for the last ones (if previously released)
+    in each suffix. If an ID is found to be used, the scripts will iterate
+    (you really want to avoid that situation !) and use the first free ID.
+
+    Given this behaviour, it is advised to clearly design user and machine
+    ID ranges and correctly set UIDSTART and MIDSTART in ldapscripts.conf.
+
+    You may want to use the following configuration (default) :
+      UIDSTART=10000
+      MIDSTART=20000
+
+    This will leave 9999 free local system user accounts, 9999 free LDAP user
+    accounts and 20000 to <max UID> free LDAP machine accounts.
+
+  Internals :
+  - renamed _findlast{user,group,machine} functions to _findnext{uid,gid,mid}
+  - functions _findnextuid and _findnextmid now look for accounts in their own
+    suffix
+  - functions _findnextuid, _findnextgid and _findnextmid now check if the
+    resulting ID is used or not and return results through stdout
+  - functions _grouptogid, _gidtogroup, _usertouid, _uidtouser and _uidtodn now
+    return results through stdout and do not end_die anymore if no ID is found
+  - replaced expr calls with shell arithmetic expansion calls $(())
+  - replaced `` calls with shell command substitution calls $()
+  - use eval for each GETENT*CMD call to avoid a "command not found" error when
+    expanding command names containing spaces, e.g. (on zsh) :
+    $ COMMAND="getent passwd" ; $COMMAND martymac
+    command not found: getent passwd
+
 2011/02/08 : ldapscripts 1.10.0
   - Added support for groupOfNames/groupOfUniqueNames group entries
     used in conjunction with RFC 2307bis AUXILIARY posixGroups.
@@ -11,7 +44,8 @@
   => thanks to Brian Candler for the original patches !
 
   - Now use 'logname' instead of 'id' to guess current user
-    (sudo users will now be logged correctly and be able to run ldapid/ldapfinger without argument)
+    (sudo users will now be logged correctly and be able to run
+    ldapid/ldapfinger without argument)
   - Cleaned log file messages format up
   - Updated WWW, Copyrights
   - Several other minor changes and fixes...

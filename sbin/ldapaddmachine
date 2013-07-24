@@ -32,12 +32,16 @@ _RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
 
 # Machine name = first argument
 _USER="$1"
+
 # Machine GID = second argument
-_grouptogid "$2"
+_GID=$(_grouptogid "$2")
+[ -z "$_GID" ] && end_die "Cannot resolve group $2 to gid : not found"
+
 # Machine UID
 if [ -z "$3" ] # No argument, we must find a correct UID
 then
-  _findlastmachine
+  _UID=$(_findnextmid)
+  [ -z "_UID" ] && end_die "Cannot guess next free machine id"
 else
   _UID="$3"
 fi

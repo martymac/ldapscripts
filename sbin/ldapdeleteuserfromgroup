@@ -35,7 +35,7 @@ case $GCLASS in
     # Set username
     _UID="$1"
     # Check groupname : $2 must exist in LDAP !
-    _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$1)(|(cn=$2)(gidNumber=$2)))" cn | grep "cn: " | head -n 1 | sed "s|cn: ||"`
+    _GID=$(_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$1)(|(cn=$2)(gidNumber=$2)))" cn | grep "cn: " | head -n 1 | sed "s|cn: ||")
     [ -z "$_GID" ] && end_die "Group $2 not found (or $_UID is not a member of group $2)"
 
     # Modify group entry
@@ -48,10 +48,11 @@ case $GCLASS in
       _UDN="$1"
     else
       # UID or username supplied, check it : $1 must exist in LDAP !
-      _uidtodn "$1"
+      _UDN=$(_uidtodn "$1")
+      [ -z "$_UDN" ] && end_die "Cannot resolve uid $1 to DN : not found"
     fi
     # Check groupname : $2 must exist in LDAP !
-    _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)($_GMEMBERATTR=$_UDN)(|(cn=$2)(gidNumber=$2)))" cn | grep "cn: " | head -n 1 | sed "s|cn: ||"`
+    _GID=$(_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)($_GMEMBERATTR=$_UDN)(|(cn=$2)(gidNumber=$2)))" cn | grep "cn: " | head -n 1 | sed "s|cn: ||")
     [ -z "$_GID" ] && end_die "Group $2 not found (or $_UDN is not a member of group $2)"
 
     # Modify group entry

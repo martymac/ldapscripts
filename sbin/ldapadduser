@@ -32,18 +32,22 @@ _RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
 
 # Username = first argument
 _USER="$1"
+
 # User GID = second argument
-_grouptogid "$2"
+_GID=$(_grouptogid "$2")
+[ -z "$_GID" ] && end_die "Cannot resolve group $2 to gid : not found"
+
 # User UID
 if [ -z "$3" ] # No argument, we must find a correct UID
 then
-  _findlastuser
+  _UID=$(_findnextuid)
+  [ -z "_UID" ] && end_die "Cannot guess next free user id"
 else
   _UID="$3"
 fi
 
 # Compute homedir
-_HOMEDIR=`echo "$UHOMES" | sed "s|%u|$_USER|g"`
+_HOMEDIR=$(echo "$UHOMES" | sed "s|%u|$_USER|g")
 
 # Use template if necessary
 if [ -n "$UTEMPLATE" ] && [ -r "$UTEMPLATE" ]

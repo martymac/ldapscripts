@@ -61,7 +61,7 @@ case "$1" in
     # Passwd-like display requested
     _OUTPUT="$_CN:*:$_GIDNUMBER:"
     # User list (memberUids, posixGroup)
-    _SECONDARYUIDS=`_ldapsearch "$_ENTRY" "" memberUid | grep "memberUid: " | sed "s|memberUid: ||"`
+    _SECONDARYUIDS=$(_ldapsearch "$_ENTRY" "" memberUid | grep "memberUid: " | sed "s|memberUid: ||")
     _FIRSTPASS=""
     for _SECONDARYUID in $_SECONDARYUIDS
     do
@@ -76,7 +76,7 @@ case "$1" in
     # User list (member DNs, groupOfNames/groupOfUniqueNames)
     if [ "$GCLASS" != "posixGroup" ]
     then
-      _SECONDARYDNS=`_ldapsearch "$_ENTRY" "" $_GMEMBERATTR | grep "$_GMEMBERATTR: " | sed "s|$_GMEMBERATTR: ||"`
+      _SECONDARYDNS=$(_ldapsearch "$_ENTRY" "" $_GMEMBERATTR | grep "$_GMEMBERATTR: " | sed "s|$_GMEMBERATTR: ||")
       _FIRSTPASS=""
       for _SECONDARYDN in $_SECONDARYDNS
       do
@@ -101,11 +101,12 @@ case "$1" in
     # Standard display requested
     _OUTPUT="gid=$_GIDNUMBER($_CN)"
     # User list (primary group)
-    _PRIMARYUIDS=`_ldapsearch "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(gidNumber=$_GIDNUMBER))" uidNumber | grep "uidNumber: " | sed "s|uidNumber: ||"`
+    _PRIMARYUIDS=$(_ldapsearch "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(gidNumber=$_GIDNUMBER))" uidNumber | grep "uidNumber: " | sed "s|uidNumber: ||")
     _FIRSTPASS=""
     for _PRIMARYUID in $_PRIMARYUIDS
     do
-      _uidtouser "$_PRIMARYUID"
+      _UID=$(_uidtouser "$_PRIMARYUID")
+      [ -z "$_UID" ] && end_die "Cannot resolve uid $_PRIMARYUID to user : not found"
       if [ -z "$_FIRSTPASS" ]
       then
         _OUTPUT="$_OUTPUT users(primary)=$_PRIMARYUID($_UID)"
@@ -115,11 +116,12 @@ case "$1" in
       fi
     done
     # User list (memberUids, posixGroup)
-    _SECONDARYUIDS=`_ldapsearch "$_ENTRY" "" memberUid | grep "memberUid: " | sed "s|memberUid: ||"`
+    _SECONDARYUIDS=$(_ldapsearch "$_ENTRY" "" memberUid | grep "memberUid: " | sed "s|memberUid: ||")
     _FIRSTPASS=""
     for _SECONDARYUID in $_SECONDARYUIDS
     do
-      _usertouid "$_SECONDARYUID"
+      _UID=$(_usertouid "$_SECONDARYUID")
+      [ -z "$_UID" ] && end_die "Cannot resolve user $_SECONDARYUID to uid : not found"
       if [ -z "$_FIRSTPASS" ]
       then
         _OUTPUT="$_OUTPUT users(secondary)=$_UID($_SECONDARYUID)"
@@ -131,7 +133,7 @@ case "$1" in
     # User list (member DNs, groupOfNames/groupOfUniqueNames)
     if [ "$GCLASS" != "posixGroup" ]
     then
-      _SECONDARYDNS=`_ldapsearch "$_ENTRY" "" $_GMEMBERATTR | grep "$_GMEMBERATTR: " | sed "s|$_GMEMBERATTR: ||"`
+      _SECONDARYDNS=$(_ldapsearch "$_ENTRY" "" $_GMEMBERATTR | grep "$_GMEMBERATTR: " | sed "s|$_GMEMBERATTR: ||")
       _FIRSTPASS=""
       for _SECONDARYDN in $_SECONDARYDNS
       do

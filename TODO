@@ -1,21 +1,19 @@
 TODO (ideas) :
 **************
 
+- Get rid of functions returning their results through shared variables
+- Call variables using the cleaner ${} syntax
+- Improve ldapid/ldapgid to dump the whole directory if no argument is given
+- Make the runtime file useable as a shell library : avoid exit in end_* functions
 - Send ldap clients error logs to stdout as well as to logfile
-- Having a kind of plugin management that would allow users to trigger functions
-  (to set specific variables or perform preliminary work)
 - Make some scripts useable with lower privileges than root :
   - Move ldapid, ldapfinger, ldapsetpasswd, lsldap to bin/ and set them suid
   - Allow common users to use these tools. It will require a kind of privilege separation
     not to bypass OpenLDAP ACLs (binding with user's account id necessary).
-  - Ldappasswd without any argument should change the caller's passwd if logname != root
+  - Ldapsetpasswd without any argument should change the caller's passwd if logname != root
 - Check for base (mandatory) binaries at install time (new 'test' target => sed, grep, ...)
   Better testing on configured/additional binaries at run time (e.g. add -f for each -x test)
 - Allow to use %g (goup name) in ldapadduser (for _HOMEDIR and _genpassword)
-- Merge UIDSTART and MIDSTART or find a way to use them efficiently
-  (currently, to avoid id overlapping, once a user or machine is created, the next id will
-  be its id + 1, for any kind of account. UIDSTART and MIDSTART are only used for the very
-  first account created ; this behaviour should be changed)
 - Add more options to the scripts (a better parsing will be necessary)
   - an option to ldapdeleteuser to delete users' home directories
   - a 'dry-run' option to display (only) LDIF data

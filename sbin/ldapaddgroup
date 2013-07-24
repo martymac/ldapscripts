@@ -32,10 +32,12 @@ _RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
 
 # Group name
 _GROUP="$1"
+
 # Group GID
 if [ -z "$2" ] # No argument, we must find a correct GID
 then
-  _findlastgroup
+  _GID=$(_findnextgid)
+  [ -z "_GID" ] && end_die "Cannot guess next free group id"
 else
   _GID="$2"
 fi

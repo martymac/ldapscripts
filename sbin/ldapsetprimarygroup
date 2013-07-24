@@ -35,7 +35,8 @@ _findentry "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))"
 [ -z "$_ENTRY" ] && end_die "User $1 not found"
 
 # Check groupname : $2
-_grouptogid "$2"
+_GID=$(_grouptogid "$2")
+[ -z "$_GID" ] && end_die "Cannot resolve group $2 to gid : not found"
 
 # Modify user entry
 _extractldif 2 | _filterldif | _utf8encode | _ldapmodify
