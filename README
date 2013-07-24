@@ -1,0 +1,79 @@
+Ldapscripts - README file
+*************************
+
+Description :
+*************
+
+These scripts are designed to be used within the Samba's smb.conf file 
+(or manually) and allow to create POSIX entries for users, groups and 
+machines in and LDAP directory. They are written in bash and just need
+ldap client commands to work correctly (ldapadd, ldapdelete, ldapmodify,
+ldapsearch).
+
+Latest version available on http://contribs.martymac.com and 
+http://www.linagora.org.
+
+Installing ldapscripts :
+************************
+
+To install these scripts, just type in :
+# ./install
+within the scripts directory. 
+
+All the scripts will be copied into /usr/local/bin and ldapscripts.conf
+will be copied into /etc/ldapscripts.
+
+Edit /etc/ldapscripts/ldapscripts.conf to configure the ldapscripts.
+
+Then, just type in - e.g. :
+# ldapadduser foo foogroup
+
+Using ldapscripts with Samba :
+******************************
+
+To use ldapscripts with Samba (e.g. for an NT4 -> Samba migration), just
+add the following to your smb.conf file :
+
+# [...]
+add machine script = /usr/local/bin/ldapaddmachine '%u' sambamachines
+add user script = /usr/local/bin/ldapadduser '%u' sambausers
+add group script = /usr/local/bin/ldapaddgroup '%g'
+add user to group script = /usr/local/bin/ldapaddusertogroup '%u' '%g'
+delete user script = /usr/local/bin/ldapdeleteuser '%u'
+delete group script = /usr/local/bin/ldapdeletegroup '%g'
+delete user from group script = /usr/local/bin/ldapdeleteuserfromgroup '%u' '%g'
+set primary group script = /usr/local/bin/ldapsetprimarygroup '%u' '%g'
+# [...]
+
+and make sure sambamachines and sambausers exist before attempting to 
+do a "net rpc vampire"...
+
+Also be sure to have nsswitch / nss_ldap working since the scripts uses
+getent to getch accounts information.
+
+Files :
+*******
+
+README : this file !
+ldapscripts.conf : configuration file
+install : installation script
+
+_ldapdeletemachine : not used within smb.conf (but may be useful anyway)
+_lsldap : does a big query on the LDAP server
+ldapaddgroup : adds a POSIX group to LDAP
+ldapadduser : adds a POSIX user to LDAP
+ldapdeletegroup : deletes a POSIX group from LDAP
+ldapdeleteuserfromgroup : deletes a memberUid entry from a POSIX group
+ldapsetprimarygroup : sets gidNumber of a POSIX user or machine account
+ldapaddmachine : adds a POSIX machine (user$) to LDAP
+ldapaddusertogroup : add a memberUid entry to a POSIX group
+ldapdeleteuser : deletes a POSIX user from LDAP
+
+Author / Licence :
+******************
+
+These scripts have been written by Ganaël LAPLANCHE (ganael.laplanche@martymac.com /
+ganael.laplanche@linagora.com) and are available within the GPL license (see COPYING
+for details).
+
+Thanks for using ldapscripts... Any feedback welcome :)

@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# ldapsetprimarygroup : modifies the gidNumber of a POSIX user or machine account in LDAP
+
+#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+if [ "$1" == "" ] || [ "$2" == "" ]
+then
+  echo "Usage : $0 <username | uid> <goupname | gid>"
+  exit -1
+fi
+
+# Read configuration
+if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
+then
+  echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
+  exit -1
+fi
+
+source /etc/ldapscripts/ldapscripts.conf
+
+# Check username : $1, must exist in LDAP ! Lookup base = global $SUFFIX, to work on machine and user accounts
+_ENTRY=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixAccount)(|(uid=$1)(cn=$1)(uidNumber=$1)))" dn 2>>"$LOGFILE" | grep "dn: " | head -n 1 | sed -e "s/dn: //"`
+if [ "$_ENTRY" == "" ] # User not found
+then
+  echo "User $1 not found" | tee -a "$LOGFILE"
+  exit -1
+fi
+
+# Check groupname : $2
+_GID=`getent group "$2" | head -n 1 | cut -d ":" -f 3` # Convert to GID any group passed in as name/gid
+if [ "$_GID" == "" ] # Group not found
+then
+  _GID=`echo "$2" | grep '[0-9]\+'` # Check if group is a gid
+  if [ "$_GID" == "" ]
+  then
+    echo "Cannot convert group $2 to gid : group name not found" | tee -a "$LOGFILE"
+    exit -1
+  fi
+  echo "Warning : gid $2 not found, using it anyway..." | tee -a "$LOGFILE"
+  _GID="$2"
+fi
+
+# Modify user entry
+grep -E '^##' "$0" | sed 's/^##//' | \
+        sed -e "s/<group>/$_GID/g" -e "s/<entry>/$_ENTRY/g" | \
+        $LDAPMODIFYBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
+
+if [ $? -ne 0 ]
+then
+  echo "Error setting primary group for user $1 (to group $2)" | tee -a "$LOGFILE"
+  exit -1
+fi
+
+echo "Successfully set primary group for user $1 (to group $2)" | tee -a "$LOGFILE"
+exit 0
+
+# Ldif info ##################################
+##dn: <entry>
+##changetype: modify
+##replace: gidNumber
+##gidNumber: <group>

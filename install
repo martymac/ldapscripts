@@ -1,0 +1,42 @@
+#!/bin/sh
+
+#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+INSTALLDIR="/usr/local/bin"
+ETCDIR="/etc/ldapscripts"
+
+mkdir -p "$INSTALLDIR" 2>/dev/null
+cp _ldapdeletemachine "$INSTALLDIR"
+cp _lsldap "$INSTALLDIR"
+cp ldapaddgroup "$INSTALLDIR"
+cp ldapadduser "$INSTALLDIR"
+cp ldapdeletegroup "$INSTALLDIR"
+cp ldapdeleteuserfromgroup "$INSTALLDIR"
+cp ldapsetprimarygroup "$INSTALLDIR"
+cp ldapaddmachine "$INSTALLDIR"
+cp ldapaddusertogroup "$INSTALLDIR"
+cp ldapdeleteuser "$INSTALLDIR"
+
+mkdir -p "$ETCDIR" 2>/dev/null
+if [ -f "$ETCDIR/ldapscripts.conf" ]
+then
+  mv "$ETCDIR/ldapscripts.conf" "$ETCDIR/ldapscripts.conf.old"
+fi
+cp ldapscripts.conf "$ETCDIR"
+
+echo "Ldapscripts are now installed ! See README for more details..."

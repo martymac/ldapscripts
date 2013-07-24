@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# ldapaddgroup : adds a POSIX group entry to LDAP
+
+#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+if [ "$1" == "" ]
+then
+  echo "Usage : $0 <groupname> [gid]"
+  exit -1
+fi
+
+# Read configuration
+if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
+then
+  echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
+  exit -1
+fi
+
+source /etc/ldapscripts/ldapscripts.conf
+
+# Group name
+_GROUP="$1"
+# Compute GID
+if [ "$2" == "" ] # No argument, we must find a correct GID
+then
+  # Find latest in LDAP
+  _GID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixGroup)' gidNumber 2>>"$LOGFILE" | grep "gidNumber: " | sed -e "s/gidNumber: //" | uniq | sort -g | tail -n 1`
+  # GID not found in LDAP
+  if [ "$_GID" == "" ]
+  then
+    _GID="$GIDSTART"
+  fi
+  _GID=`expr "$_GID" + 1` # GID = GID + 1
+else
+  _GID="$2"
+fi
+
+if [ "$_GROUP" == "" ] || [ "$_GID" == "" ]
+then
+  echo "Error with group $_GROUP (gid : $_GID), exiting..." | tee -a "$LOGFILE"
+  exit -1
+fi
+
+grep -E '^##' "$0" | sed 's/^##//' | \
+	sed -e "s/<group>/$_GROUP/g" -e "s/<gsuffix>/$GSUFFIX/g" -e "s/<suffix>/$SUFFIX/g" -e "s/<groupid>/$_GID/g" | \
+	$LDAPADDBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
+
+if [ $? -ne 0 ]
+then
+  echo "Error adding group $1 to LDAP" | tee -a "$LOGFILE"
+  exit -1
+fi
+
+echo "Successfully added group $1 to LDAP" | tee -a "$LOGFILE"
+exit 0
+
+# Ldif info
+##dn: cn=<group>,<gsuffix>,<suffix>
+##objectClass: posixGroup
+##cn: <group>
+##gidNumber: <groupid>
