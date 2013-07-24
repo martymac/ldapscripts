@@ -1,3 +1,8 @@
+2008/08/10 : ldapscripts 1.8.0
+  - No changes since 1.8.0rc1, but tests have been performed
+    on Debian and Ubuntu with success, so let's rock !
+    (Adam, thanks again :))
+
 2008/08/08 : ldapscripts 1.8.0rc1
   - HEADS UP ! The scripts are no longer named using a heading '_'. This
     prefix was used to differentiate extra commands not directly useable by Samba
