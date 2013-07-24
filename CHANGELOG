@@ -1,3 +1,7 @@
+2007/11/28 : ldapscripts 1.7.2
+  - runtime : Use 'trap - <signal>' to restore traps instead of the uncommon 'trap -' syntax
+  - runtime : Fix _changepasswd by removing the trailing newline character in the temporary file (echo -n)
+
 2007/10/13 : ldapscripts 1.7.1
   - Fixes for CVE-2007-5373
     see http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2007-5373

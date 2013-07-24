@@ -33,7 +33,7 @@ RUNDIR = $(ETCDIR)
 SHELL=/bin/sh
 NAME = ldapscripts
 #SUFFIX = -devel
-VERSION = 1.7.1
+VERSION = 1.7.2
 
 RUNFILE = runtime
 ETCFILE = ldapscripts.conf

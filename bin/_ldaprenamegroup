@@ -29,11 +29,11 @@ fi
 _RUNTIMEFILE="/etc/ldapscripts/runtime"
 . "$_RUNTIMEFILE"
 
-# Find dest username : $2 must not exist in LDAP !
+# Find dest groupname : $2 must not exist in LDAP !
 _findentry "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(cn=$2))"
 [ -z "$_ENTRY" ] || end_die "Group $2 already exists in LDAP"
 
-# Find src username : $1 must exist in LDAP !
+# Find src groupname : $1 must exist in LDAP !
 _findentry "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))"
 [ -z "$_ENTRY" ] && end_die "Group $1 not found in LDAP"
 

@@ -121,7 +121,7 @@ reltempf () {
   # Clean up the temporary file and restore traps
   rm -f "$_TMPFILE" 2>/dev/null
   # Reset traps
-  trap -
+  trap - 2
   # Clean up name
   _TMPFILE=''
 }
@@ -371,7 +371,7 @@ _changepassword () {
       # Allocate and create temp file
       mktempf
       # Generate password file
-      echo "$1" > "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
+      echo -n "$1" > "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
       # Change password
       $LDAPPASSWDBIN -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -T "$_TMPFILE" "$2" 2>>"$LOGFILE" 1>/dev/null
       # Release temp file
