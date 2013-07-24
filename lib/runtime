@@ -618,10 +618,10 @@ fi
   end_die  "You must have uuencode installed before running these scripts"
 
 # Pseudo-random number generator
-[ ! -e /dev/random ] && end_die  "You need a /dev/random special file to run these scripts"
+[ ! -e /dev/random ] && end_die "You need a /dev/random special file to run these scripts"
 
 # Set USER variable to the real user (do not trust current $USER value)
-USER=`logname`
+USER=`id -nu`
 
 # Check for bindpwd file
 if [ ! -f "$BINDPWDFILE" ] || [ ! -r "$BINDPWDFILE" ]

@@ -1,0 +1,112 @@
+#!/bin/sh
+
+#  ldapgid : displays a group's list of IDs
+
+#  Copyright (C) 2009 Ganaël LAPLANCHE
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
+then
+  echo "Usage : $0 [-P] <groupname | gid>"
+  exit 1
+fi
+
+# Source runtime file
+_RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
+
+# Parse options
+case "$1" in
+  "-P")
+    # Passwd-like display requested
+    [ -z "$2" ] && end_die 'Please specify a GID or a group name'
+    _GROUP="$2"
+    ;;
+  *)
+    # Standard display requested
+    _GROUP="$1"
+    ;;
+esac
+
+# Check groupname
+_findentry "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$_GROUP)(gidNumber=$_GROUP)))"
+[ -z "$_ENTRY" ] && end_die "Group $_GROUP not found in LDAP"
+
+# Get each (common) attribute 
+# gidNumber
+_getattribute "$_ENTRY" "gidNumber"
+[ -z "$_ATTRIBUTE" ] && end_die "Error getting group attribute from LDAP (gidNumber)"
+_GIDNUMBER="$_ATTRIBUTE"
+# cn
+_getattribute "$_ENTRY" "cn"
+[ -z "$_ATTRIBUTE" ] && end_die "Error getting group attribute from LDAP (cn)"
+_CN="$_ATTRIBUTE"
+
+case "$1" in
+  "-P")
+    # Passwd-like display requested
+    _OUTPUT="$_CN:*:$_GIDNUMBER:"
+    # User list (secondary group)
+    _SECONDARYUIDS=`_ldapsearch "$_ENTRY" "" memberUid | grep "memberUid: " | sed "s|memberUid: ||"`
+    _FIRSTPASS=""
+    for _SECONDARYUID in $_SECONDARYUIDS
+    do
+      if [ -z "$_FIRSTPASS" ]
+      then
+        _OUTPUT="$_OUTPUT$_SECONDARYUID"
+        _FIRSTPASS="done"
+      else
+        _OUTPUT="$_OUTPUT,$_SECONDARYUID"
+    fi
+    done
+    ;;
+  *)
+    # Standard display requested
+    _OUTPUT="gid=$_GIDNUMBER($_CN)"
+    # User list (primary group)
+    _PRIMARYUIDS=`_ldapsearch "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(gidNumber=$_GIDNUMBER))" uidNumber | grep "uidNumber: " | sed "s|uidNumber: ||"`
+    _FIRSTPASS=""
+    for _PRIMARYUID in $_PRIMARYUIDS
+    do
+      _uidtouser "$_PRIMARYUID"
+      if [ -z "$_FIRSTPASS" ]
+      then
+        _OUTPUT="$_OUTPUT users(primary)=$_PRIMARYUID($_UID)"
+        _FIRSTPASS="done"
+      else
+        _OUTPUT="$_OUTPUT,$_PRIMARYUID($_UID)"
+      fi
+    done
+    # User list (secondary group)
+    _SECONDARYUIDS=`_ldapsearch "$_ENTRY" "" memberUid | grep "memberUid: " | sed "s|memberUid: ||"`
+    _FIRSTPASS=""
+    for _SECONDARYUID in $_SECONDARYUIDS
+    do
+      _usertouid "$_SECONDARYUID"
+      if [ -z "$_FIRSTPASS" ]
+      then
+        _OUTPUT="$_OUTPUT users(secondary)=$_UID($_SECONDARYUID)"
+        _FIRSTPASS="done"
+      else
+        _OUTPUT="$_OUTPUT,$_UID($_SECONDARYUID)"
+      fi
+    done
+    ;;
+esac
+
+# Display result
+echo $_OUTPUT && end_ok

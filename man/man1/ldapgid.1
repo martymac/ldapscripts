@@ -1,4 +1,4 @@
-.\" Copyright (C) 2007 Ganaël LAPLANCHE
+.\" Copyright (C) 2009 Ganaël LAPLANCHE
 .\"
 .\" This program is free software; you can redistribute it and/or
 .\" modify it under the terms of the GNU General Public License
@@ -19,28 +19,31 @@
 .\" ganael.laplanche@martymac.com
 .\" http://contribs.martymac.com
 .\"
-.TH ldapmodifymachine 1 "August 22, 2007"
+.TH ldapgid 1 "January 23, 2009"
 
 .SH NAME
-ldapmodifymachine \- modifies a POSIX machine account in LDAP interactively
+ldapgid \- displays a group's list of IDs the way ldapid(1) does.
 
 .SH SYNOPSIS
-.B ldapmodifymachine
-.RB <machinename with ending $ | uid>
+.B ldapgid
+.RB [-P] <groupname | gid>
  
 .SH DESCRIPTION
-ldapmodifymachine first looks for the right entry to modify. Once found, the entry is presented and you
-are prompted to enter LDIF data to modify it as you would do using a standard LDIF file and ldapmodify(1).
-The DN of the entry being modified is already specified : just begin with a changeType attribute or any
-other one(s) of your choice (in this case, the defaut changeType is 'modify').
+.TP
+The following is displayed : gid=gidNumber(cn) users(primary)=uidNumber(uid)[,uidNumber(uid)...] users(secondary)=uidNumber(uid)[,uidNumber(uid)...].
+.TP
+users(primary) lists users having the group declared as their primary group. users(secondary) lists users using the group as a secondary one.
 
 .SH OPTIONS
 .TP
-.B <machinename with ending $ | uid>
-The name or uid of the machine to modify.
+.B <groupname | gid>
+Group name or GID of a group to show information about.
+.TP
+.B [-P]
+Display group information as a /etc/group file entry.
 
 .SH "SEE ALSO"
-ldapmodifyuser(1), ldapmodifygroup(1), ldapscripts(5).
+ldapid(1), lsldap(1), ldapfinger(1), ldapscripts(5).
 
 .SH AVAILABILITY
 The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).

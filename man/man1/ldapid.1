@@ -20,12 +20,11 @@
 .\" http://contribs.martymac.com
 .\"
 .TH ldapid 1 "July 1, 2008"
-.LO 1
 
 .SH NAME
 ldapid \- displays a user's list of IDs the way 'id' does.
 .TP
-The following is displayed : uidNumber(uid) gidNumber(cn) groups=gidNumber(cn)[,secondary groups...].
+The following is displayed : uid=uidNumber(uid) gid=gidNumber(cn) groups=gidNumber(cn)[,gidNumber(cn)...].
 
 .SH SYNOPSIS
 .B ldapid
@@ -40,7 +39,7 @@ Login or UID of a user to show information about. Acts on current user if not sp
 Display user information as a password file entry.
 
 .SH "SEE ALSO"
-lsldap(1), ldapfinger(1), ldapscripts(5).
+ldapgid(1), lsldap(1), ldapfinger(1), ldapscripts(5).
 
 .SH AVAILABILITY
 The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).

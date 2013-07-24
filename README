@@ -124,6 +124,7 @@ sbin/ldaprenamegroup : renames a POSIX group in LDAP
 sbin/ldapsetpasswd : modifies a POSIX user account's password in LDAP
 sbin/ldapfinger : displays a user/machine/group POSIX account's details
 sbin/ldapid : displays a user's list of IDs
+sbin/ldapgid : displays a group's list of IDs
 
 Author / Licence :
 ******************

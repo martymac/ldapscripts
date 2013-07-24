@@ -60,15 +60,15 @@ _findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$_USER)(uidNum
 # Get each (common) attribute 
 # uidNumber
 _getattribute "$_ENTRY" "uidNumber"
-[ -z "$_ATTRIBUTE" ] && end_die "Error getting user attributes from LDAP (uidNumber)"
+[ -z "$_ATTRIBUTE" ] && end_die "Error getting user attribute from LDAP (uidNumber)"
 _UIDNUMBER="$_ATTRIBUTE"
 # uid (login)
 _getattribute "$_ENTRY" "uid"
-[ -z "$_ATTRIBUTE" ] && end_die "Error getting user attributes from LDAP (uid)"
+[ -z "$_ATTRIBUTE" ] && end_die "Error getting user attribute from LDAP (uid)"
 _UID="$_ATTRIBUTE"
 # gidNumber
 _getattribute "$_ENTRY" "gidNumber"
-[ -z "$_ATTRIBUTE" ] && end_die "Error getting user attributes from LDAP (gidNumber)"
+[ -z "$_ATTRIBUTE" ] && end_die "Error getting user attribute from LDAP (gidNumber)"
 _PRIMARYGID="$_ATTRIBUTE"
 
 case "$1" in
