@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#  _lsldap : does a *big* query on the LDAP directory
+#  ldapdeletegroup : deletes a POSIX group account from LDAP
 
 #  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
 #
@@ -19,15 +19,20 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 #  USA.
 
-# Read configuration
-if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
+if [ -z "$1" ]
 then
-  echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
+  echo "Usage : $0 <groupname | gid>"
   exit 1
 fi
 
-. /etc/ldapscripts/ldapscripts.conf
+# Source runtime file
+_RUNTIMEFILE="/etc/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
 
-# Search whole directory as $BINDDN... may be *VERY* long
-$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL
+# Find groupname : $1 must exist in LDAP !
+_findentry "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))"
+[ -z "$_ENTRY" ] && end_die "Group $1 not found in LDAP"
 
+# Delete entry
+_ldapdelete "$_ENTRY" || end_die "Error deleting group $_ENTRY from LDAP"
+end_ok "Successfully deleted group $_ENTRY from LDAP"

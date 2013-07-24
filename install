@@ -17,29 +17,57 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 #  USA.
 
-INSTALLDIR="/usr/local/bin"
+# Specify absolute paths here
+BINDIR="/usr/local/bin"
+MANDIR="/usr/share/man"
 ETCDIR="/etc/ldapscripts"
+RUNTIMEDIR="/etc/ldapscripts"
+ETCFILE="ldapscripts.conf"
+RUNTIMEFILE="runtime"
 
-mkdir -p "$INSTALLDIR" 2>/dev/null
-cp _ldapdeletemachine "$INSTALLDIR"
-cp _ldapinit "$INSTALLDIR"
-cp _lsldap "$INSTALLDIR"
-cp ldapaddgroup "$INSTALLDIR"
-cp ldapadduser "$INSTALLDIR"
-cp ldapdeletegroup "$INSTALLDIR"
-cp ldapdeleteuserfromgroup "$INSTALLDIR"
-cp ldapsetprimarygroup "$INSTALLDIR"
-cp ldapaddmachine "$INSTALLDIR"
-cp ldapaddusertogroup "$INSTALLDIR"
-cp ldapdeleteuser "$INSTALLDIR"
+# Prepare sources
+sed -i.orig -e "s|^_RUNTIMEFILE=.*|_RUNTIMEFILE=\"${RUNTIMEDIR}/${RUNTIMEFILE}\"|g" bin/*
+sed -i.orig -e "s|^_CONFIGFILE=.*|_CONFIGFILE=\"${ETCDIR}/${ETCFILE}\"|g" etc/*
 
-mkdir -p "$ETCDIR" 2>/dev/null
-if [ -f "$ETCDIR/ldapscripts.conf" ]
+# Script files
+mkdir -p "${BINDIR}" 2>/dev/null
+cp bin/_ldapdeletemachine "${BINDIR}"
+cp bin/_ldaprenamegroup "${BINDIR}"
+cp bin/_ldaprenamemachine "${BINDIR}"
+cp bin/_ldapinit "${BINDIR}"
+cp bin/_lsldap "${BINDIR}"
+cp bin/ldapaddgroup "${BINDIR}"
+cp bin/ldapadduser "${BINDIR}"
+cp bin/ldapdeletegroup "${BINDIR}"
+cp bin/ldapdeleteuserfromgroup "${BINDIR}"
+cp bin/ldapsetprimarygroup "${BINDIR}"
+cp bin/ldapaddmachine "${BINDIR}"
+cp bin/ldapaddusertogroup "${BINDIR}"
+cp bin/ldapdeleteuser "${BINDIR}"
+cp bin/ldaprenameuser "${BINDIR}"
+
+# Man pages
+mkdir -p "${MANDIR}"/man1 2>/dev/null
+for i in man/man1/*
+do
+	cat "${i}" | gzip - > "${MANDIR}"/man1/`basename ${i}`.gz
+done
+mkdir -p "${MANDIR}"/man5 2>/dev/null
+for i in man/man5/*
+do
+	cat "${i}" | gzip - > "${MANDIR}"/man5/`basename ${i}`.gz
+done
+
+# Configuration and runtime files
+mkdir -p "${ETCDIR}" 2>/dev/null
+if [ -f "${ETCDIR}/${ETCFILE}" ]
 then
-  mv "$ETCDIR/ldapscripts.conf" "$ETCDIR/ldapscripts.conf.old"
-  echo "Old configuration file found, saved under $ETCDIR/ldapscripts.conf.old"
+  mv "${ETCDIR}/${ETCFILE}" "${ETCDIR}/${ETCFILE}.old"
+  echo "Old configuration file found, saved under ${ETCDIR}/${ETCFILE}.old"
 fi
-cp ldapscripts.conf "$ETCDIR"
-cp runtime "$ETCDIR"
+cp etc/ldapscripts.conf "${ETCDIR}/${ETCFILE}"
+
+mkdir -p "${RUNTIMEDIR}" 2>/dev/null
+cp etc/runtime "${RUNTIMEDIR}/${RUNTIMEFILE}"
 
 echo "Ldapscripts are now installed ! See README for more details..."

@@ -6,28 +6,28 @@ Description :
 
 These scripts are designed to be used within the Samba's smb.conf file 
 (or manually) and allow to create POSIX entries for users, groups and 
-machines in and LDAP directory. They are written in sh and need ldap 
+machines in an LDAP directory. They are written in sh and need ldap 
 client commands to work correctly (ldapadd, ldapdelete, ldapmodify,
 ldapsearch).
 
 They are designed to be used under GNU/Linux or FreeBSD (any other
 UNIX-like should also work) and require several binaries that should 
-come with your OS (uuencode, getent/pw, date, grep, sed, cut, expr, 
-which...) ; please make sure this is right before using them !
+come with your OS (uuencode, getent/pw, date, grep, sed, cut, expr...)
 
 Latest version available on http://contribs.martymac.com
 
-Installing ldapscripts :
-************************
+Installing and configuring the ldapscripts :
+********************************************
 
-To install these scripts, just type in :
+To install the scripts, just edit the install file to 
+set up the installation directories, then type in :
 # ./install
-within the scripts directory. 
 
-All the scripts will be copied into /usr/local/bin and ldapscripts.conf
-will be copied into /etc/ldapscripts.
+All the scripts will be copied (by default) into /usr/local/bin and 
+ldapscripts.conf will be copied into /etc/ldapscripts.
 
-Edit /etc/ldapscripts/ldapscripts.conf to configure the ldapscripts.
+Once installed, edit /etc/ldapscripts/ldapscripts.conf to 
+configure the ldapscripts.
 
 Then, just type in - e.g. :
 # ldapadduser foo foogroup
@@ -56,6 +56,7 @@ delete user script = /usr/local/bin/ldapdeleteuser '%u'
 delete group script = /usr/local/bin/ldapdeletegroup '%g'
 delete user from group script = /usr/local/bin/ldapdeleteuserfromgroup '%u' '%g'
 set primary group script = /usr/local/bin/ldapsetprimarygroup '%u' '%g'
+rename user script = /usr/local/bin/ldaprenameuser '%uold' '%unew'
 # [...]
 
 and make sure sambamachines and sambausers exist before attempting to 
@@ -68,13 +69,28 @@ getent (or pw for FreeBSD) to fetch accounts information.
 Files :
 *******
 
+Various files :
+
 README : this file !
+CHANGELOG : the changelog file, of course
+VERSION : the current version of the ldapscripts
+COPYING : the GPLv2 license
+TODO : ideas, remaining work
 ldapscripts.conf : configuration file
+runtime : runtime file used by the scripts (contains functions, etc...)
 install : installation script
+man/* : man pages
+
+Scripts not used by Samba (begin with a "_") :
 
 _ldapdeletemachine : not used within smb.conf (but may be useful anyway)
 _ldapinit : initializes the LDAP tree with a minimal hierarchy
 _lsldap : does a big query on the LDAP server
+_ldaprenamemachine : renames a POSIX machine account in LDAP
+_ldaprenamegroup : renames a POSIX group in LDAP
+
+Scripts that can be used in Samba's configuration file (smb.conf) :
+
 ldapaddgroup : adds a POSIX group to LDAP
 ldapadduser : adds a POSIX user to LDAP
 ldapdeletegroup : deletes a POSIX group from LDAP
@@ -83,6 +99,7 @@ ldapsetprimarygroup : sets gidNumber of a POSIX user or machine account
 ldapaddmachine : adds a POSIX machine (user$) to LDAP
 ldapaddusertogroup : add a memberUid entry to a POSIX group
 ldapdeleteuser : deletes a POSIX user from LDAP
+ldaprenameuser : renames a POSIX user account in LDAP
 
 Author / Licence :
 ******************

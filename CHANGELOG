@@ -1,3 +1,18 @@
+2006/01/05 : ldapscripts 1.4
+  - More code cleaning !!! Code now clean... (and bug-free ???) - thanks to Madcoder for the help he provided !
+  - Removed dependency to slappasswd !!! Using ldappasswd instead (included in the standard ldap-client commands)
+  - Added new ldaprenameuser command (uses ldapmodrdn included in the standard ldap-client commands)
+      Add this to Samba 3.0.21's configuration file : rename user script = ldaprenameuser '%uold' '%unew'
+      Warning : renaming an entry (user/group/machine) only involves renaming its RDN !
+      This means may have to change manually the account's homedir (user) and modify each group to include the new 
+      rdn (user/machine) as a memberuid.
+  - Also added useful _ldaprenamegroup and _ldaprenamemachine scripts (not used by Samba)
+  - A user/machine is now searched using its uid (no more use of its cn)
+  - Full command now shown in logs
+  - Modified README
+  - New TODO file
+  - Man pages (section 1 for each script, section 5 for a global "ldapscripts" manual)
+
 2005/10/01 : ldapscripts 1.3
   Compatibility rework / code cleaning - the scripts now work on FreeBSD !
   - no more calls to "source", use . instead

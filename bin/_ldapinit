@@ -19,14 +19,9 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 #  USA.
 
-# Read configuration
-if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
-then
-  echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
-  exit 1
-fi
-
-. /etc/ldapscripts/ldapscripts.conf
+# Source runtime file
+_RUNTIMEFILE="/etc/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
 
 # Clean up suffix info
 _SUFFIX=`echo $SUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
@@ -34,21 +29,10 @@ _USUFFIX=`echo $USUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
 _GSUFFIX=`echo $GSUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
 _MSUFFIX=`echo $MSUFFIX | cut -d ',' -f 1 | cut -d '=' -f 2`
 
-grep -E '^##' "$0" | sed 's|^##||' | \
-        sed -e "s|<suffix>|$SUFFIX|g" -e "s|<_suffix>|$_SUFFIX|g" \
-            -e "s|<usuffix>|$USUFFIX|g" -e "s|<_usuffix>|$_USUFFIX|g" \
-            -e "s|<msuffix>|$MSUFFIX|g" -e "s|<_msuffix>|$_MSUFFIX|g" \
-            -e "s|<gsuffix>|$GSUFFIX|g" -e "s|<_gsuffix>|$_GSUFFIX|g" | \
-        $LDAPADDBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
+_extractldif | _filterldif | _ldapadd
 
-if [ $? -ne 0 ]
-then
-  echo "Error initializing LDAP tree" | tee -a "$LOGFILE"
-  exit 1
-fi
-
-echo "Successfully initialized LDAP tree" | tee -a "$LOGFILE"
-exit 0
+[ $? -eq 0 ] || end_die "Error initializing LDAP tree"
+end_ok "Successfully initialized LDAP tree"
 
 # Ldif info ##################################
 ##dn: <suffix>
@@ -76,4 +60,3 @@ exit 0
 ##dn: ou=Idmap,<suffix>
 ##objectClass: organizationalUnit
 ##ou: Idmap
-

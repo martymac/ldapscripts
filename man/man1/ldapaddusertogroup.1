@@ -1,0 +1,50 @@
+.\" Copyright (C) 2006 Ganaël LAPLANCHE
+.\"
+.\" This program is free software; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License
+.\" as published by the Free Software Foundation; either version 2
+.\" of the License, or (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+.\" USA.
+.\"
+.\" Ganael Laplanche
+.\" ganael.laplanche@martymac.com
+.\" http://contribs.martymac.com
+.\"
+.TH ldapaddusertogroup 1 "January 1, 2006"
+.LO 1
+
+.SH NAME
+ldapaddusertogroup \- adds a memberUid attribute to a POSIX group in LDAP.
+
+.SH SYNOPSIS
+.B ldapaddusertogroup
+.RB <username | uid>
+.RB <goupname | gid>
+
+.SH OPTIONS
+.TP
+.B <username | uid>
+The name or the uid of the user to add. It can be a machine name (with an ending $) or a user name.
+.TP
+.B <goupname | gid>
+The name or the gid of the group that should welcome the new user.
+
+.SH "SEE ALSO"
+ldapdeleteuserfromgroup(1), ldapsetprimarygroup(1), ldapscripts(5).
+
+.SH AVAILABILITY
+The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).
+The latest version of the ldapscripts is available on :
+.B http://contribs.martymac.com
+
+.SH BUGS
+No bug known

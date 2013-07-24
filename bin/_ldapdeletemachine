@@ -19,37 +19,20 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 #  USA.
 
-if [ "$1" = "" ]
+if [ -z "$1" ]
 then
   echo "Usage : $0 <machinename with ending \$ | uid>"
   exit 1
 fi
 
-# Read configuration
-if [ ! -f /etc/ldapscripts/ldapscripts.conf ]
-then
-  echo "Unable to read configuration file from /etc/ldapscripts/ldapscripts.conf, exiting..." | tee -a "$LOGFILE"
-  exit 1
-fi
+# Source runtime file
+_RUNTIMEFILE="/etc/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
 
-. /etc/ldapscripts/ldapscripts.conf
-
-# Find machinename : $1, must exist in LDAP !
-_ENTRY=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$MSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL "(&(objectClass=posixAccount)(|(uid=$1)(cn=$1)(uidNumber=$1)))" dn 2>>"$LOGFILE" | grep "dn: " | head -n 1 | sed -e "s|dn: ||"`
-if [ "$_ENTRY" = "" ] # User not found
-then
-  echo "Machine $1 not found in LDAP" | tee -a "$LOGFILE"
-  exit 1
-fi
+# Find machinename : $1 must exist in LDAP !
+_findentry "$MSUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))"
+[ -z "$_ENTRY" ] && end_die "Machine $1 not found in LDAP"
 
 # Delete entry
-$LDAPDELETEBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" "$_ENTRY" 2>>"$LOGFILE" 1>/dev/null
-
-if [ $? -ne 0 ]
-then
-  echo "Error deleting machine $_ENTRY from LDAP" | tee -a "$LOGFILE"
-  exit 1
-fi
-
-echo "Successfully deleted machine $_ENTRY from LDAP" | tee -a "$LOGFILE"
-exit 0
+_ldapdelete "$_ENTRY" || end_die "Error deleting machine $_ENTRY from LDAP"
+end_ok "Successfully deleted machine $_ENTRY from LDAP"
