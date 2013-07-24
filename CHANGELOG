@@ -1,3 +1,7 @@
+2005/07/15 : ldapscript 1.2
+  - applied patch from Vincent Esposito to make sure uid/gid/mid found in LDAP is higher than *START ones
+  - small documentation modifications
+
 2005/02/18 : ldapscripts 1.1
   - added _ldapinit command, to inititalize an LDAP directory with a minimal hierarchy
   - added support for home directories creation (see ldapscripts.conf)

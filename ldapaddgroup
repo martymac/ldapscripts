@@ -41,8 +41,8 @@ if [ "$2" == "" ] # No argument, we must find a correct GID
 then
   # Find latest in LDAP
   _GID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$GSUFFIX,$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixGroup)' gidNumber 2>>"$LOGFILE" | grep "gidNumber: " | sed -e "s|gidNumber: ||" | uniq | sort -g | tail -n 1`
-  # GID not found in LDAP
-  if [ "$_GID" == "" ]
+  # GID not found in LDAP or GID smaller than GIDSTART
+  if [ "$_GID" == "" ] || [ ! "$_GID" -gt "$GIDSTART" ]
   then
     _GID="$GIDSTART"
   fi

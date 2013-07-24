@@ -6,12 +6,15 @@ Description :
 
 These scripts are designed to be used within the Samba's smb.conf file 
 (or manually) and allow to create POSIX entries for users, groups and 
-machines in and LDAP directory. They are written in bash and just need
-ldap client commands to work correctly (ldapadd, ldapdelete, ldapmodify,
+machines in and LDAP directory. They are written in sh and need ldap 
+client commands to work correctly (ldapadd, ldapdelete, ldapmodify,
 ldapsearch).
 
-Latest version available on http://contribs.martymac.com and 
-http://www.linagora.org.
+They are designed to be used under GNU/Linux and require several binaries
+that should come with your distro (uuencode, getent, date, grep, sed, cut, 
+expr, which...) ; please make sure this is right before using them !
+
+Latest version available on http://contribs.martymac.com
 
 Installing ldapscripts :
 ************************
@@ -70,11 +73,20 @@ ldapaddmachine : adds a POSIX machine (user$) to LDAP
 ldapaddusertogroup : add a memberUid entry to a POSIX group
 ldapdeleteuser : deletes a POSIX user from LDAP
 
+Ldapscripts on FreeBSD ?
+************************
+
+The ldapscripts don't run on FreeBSD at the moment. The main problem is the
+getent command is not available on FreeBSD. If you wanna run the scripts on
+FreeBSD, just use pw instead of getent. 
+
+I haven't have enough time to patch the scripts to make them work 
+out-of-the-box ! (any contrib welcome ;-))
+
 Author / Licence :
 ******************
 
-These scripts have been written by Ganaël LAPLANCHE (ganael.laplanche@martymac.com /
-ganael.laplanche@linagora.com) and are available within the GPL license (see COPYING
-for details).
+These scripts have been written by Ganaël LAPLANCHE (ganael.laplanche@martymac.com)
+and are available within the GPL license (see COPYING for details).
 
 Thanks for using ldapscripts... Any feedback welcome :)

@@ -53,8 +53,8 @@ if [ "$3" == "" ] # No argument, we must find a correct UID
 then
   # Find latest in LDAP (base = global $SUFFIX, because machines and users are both posix accounts)
   _UID=`$LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "$SUFFIX" -xH "ldap://$SERVER" -s sub -LLL '(objectClass=posixAccount)' uidNumber 2>>"$LOGFILE" | grep "uidNumber: " | sed -e "s|uidNumber: ||" | uniq | sort -g | tail -n 1`
-  # UID not found in LDAP
-  if [ "$_UID" == "" ]
+  # UID not found in LDAP or UID smaller than MIDSTART
+  if [ "$_UID" == "" ] || [ ! "$_UID" -gt "$MIDSTART" ]
   then
     _UID="$MIDSTART"
   fi
