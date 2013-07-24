@@ -1,10 +1,10 @@
-2010/??/?? : ldapscripts 1.10.0
+2011/02/08 : ldapscripts 1.10.0
   - Added support for groupOfNames/groupOfUniqueNames group entries
     used in conjunction with RFC 2307bis AUXILIARY posixGroups.
     It is now possible to handle member users as, respectively, member
     or uniqueMember full DN entries.
 
-  => thanks to Muzzol for the original patches !
+  => thanks to Àngel "muzzol" Bosch for the original patches !
 
   - Added initial support for SASL authentication
 
