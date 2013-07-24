@@ -1,0 +1,49 @@
+#!/bin/sh
+
+#  ldapsetprimarygroup : modifies the gidNumber of a POSIX user or machine account in LDAP
+
+#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
+then
+  echo "Usage : $0 <username | uid> <groupname | gid>"
+  exit 1
+fi
+
+# Source runtime file
+_RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
+
+# Check username : $1 must exist in LDAP ! Lookup base = global $SUFFIX, to work on machine and user accounts
+_findentry "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))"
+[ -z "$_ENTRY" ] && end_die "User $1 not found"
+
+# Check groupname : $2
+_grouptogid "$2"
+
+# Modify user entry
+_extractldif 2 | _filterldif | _utf8encode | _ldapmodify
+
+[ $? -eq 0 ] || end_die "Error setting primary group for user $1 (to group $2)"
+end_ok "Successfully set primary group for user $1 (to group $2)"
+
+# Ldif template ##################################
+##dn: <entry>
+##changetype: modify
+##replace: gidNumber
+##gidNumber: <gid>

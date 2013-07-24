@@ -1,0 +1,112 @@
+#!/bin/sh
+
+#  ldapid : displays a user's list of IDs
+
+#  Copyright (C) 2008 Ganaël LAPLANCHE
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]
+then
+  echo "Usage : $0 [-P] [username | uid]"
+  exit 1
+fi
+
+# Source runtime file
+_RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
+
+# Parse options
+case "$1" in
+  "-P")
+    # Passwd-like display requested
+    if [ -z "$2" ]
+    then
+      # Current user
+      [ -z "$USER" ] && end_die 'Could not guess current user (no $USER variable set)'
+      _USER="$USER"
+    else
+      _USER="$2"
+    fi
+    ;;
+  "")
+    # Standard display requested (current user)
+    [ -z "$USER" ] && end_die 'Could not guess current user (no $USER variable set)'
+    _USER="$USER"
+    ;;
+  *)
+    # Standard display requested (with arg)
+    _USER="$1"
+    ;;
+esac
+
+# Check username
+_findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))"
+[ -z "$_ENTRY" ] && end_die "User $_USER not found in LDAP"
+
+# Get each (common) attribute 
+# uidNumber
+_getattribute "$_ENTRY" "uidNumber"
+[ -z "$_ATTRIBUTE" ] && end_die "Error getting user attributes from LDAP (uidNumber)"
+_UIDNUMBER="$_ATTRIBUTE"
+# uid (login)
+_getattribute "$_ENTRY" "uid"
+[ -z "$_ATTRIBUTE" ] && end_die "Error getting user attributes from LDAP (uid)"
+_UID="$_ATTRIBUTE"
+# gidNumber
+_getattribute "$_ENTRY" "gidNumber"
+[ -z "$_ATTRIBUTE" ] && end_die "Error getting user attributes from LDAP (gidNumber)"
+_PRIMARYGID="$_ATTRIBUTE"
+
+case "$1" in
+  "-P")
+    # Passwd-like display requested
+    # Fetch additional attributes
+    _getattribute "$_ENTRY" "gecos"
+    _GECOS=${_ATTRIBUTE:-""}
+    _getattribute "$_ENTRY" "homeDirectory"
+    _HOMEDIR=${_ATTRIBUTE:-""}
+    _getattribute "$_ENTRY" "loginShell"
+    _SHELL=${_ATTRIBUTE:-""}
+    _getattribute "$_ENTRY" "userPassword"
+    _PASSWD=${_ATTRIBUTE:-""}
+    is_yes "$_B64" && _PASSWD=`echo -n $_PASSWD | _b64decode | _utf8decode`
+    # Remove leading encoding scheme
+    _PASSWD=`echo $_PASSWD | sed "s|{.*}||"`
+    # Prepare output
+    _OUTPUT="$_UID:$_PASSWD:$_UIDNUMBER:$_PRIMARYGID::0:0"
+    _OUTPUT="$_OUTPUT:$_GECOS:$_HOMEDIR:$_SHELL"
+    ;;
+  *)
+    # Standard display requested (current user)
+    # Compute additional attribute : primary group name
+    _gidtogroup "$_PRIMARYGID"
+    _PRIMARYGROUP="$_GID"
+    # Prepare output
+    _OUTPUT="uid=$_UIDNUMBER($_UID) gid=$_PRIMARYGID($_PRIMARYGROUP)"
+    _OUTPUT="$_OUTPUT groups=$_PRIMARYGID($_PRIMARYGROUP)"
+    # Get secondary groups
+    _SECONDARYGIDS=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$_UID))" gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||"`
+    for _SECONDARYGID in $_SECONDARYGIDS
+    do
+      _gidtogroup "$_SECONDARYGID"
+      _OUTPUT="$_OUTPUT,$_SECONDARYGID($_GID)"
+    done
+    ;;
+esac
+
+# Display result
+echo $_OUTPUT && end_ok

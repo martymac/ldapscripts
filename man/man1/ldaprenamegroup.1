@@ -19,35 +19,32 @@
 .\" ganael.laplanche@martymac.com
 .\" http://contribs.martymac.com
 .\"
-.TH _ldaprenameuser 1 "January 1, 2006"
+.TH ldaprenamegroup 1 "January 1, 2006"
 .LO 1
 
 .SH NAME
-_ldaprenameuser \- renames a POSIX user account in LDAP.
+ldaprenamegroup \- renames a POSIX group in LDAP.
 
 .SH SYNOPSIS
-.B _ldaprenameuser
-.RB <old\ username | uid>
-.RB <new\ username>
-
+.B ldaprenamegroup
+.RB <old\ groupname | gid>
+.RB <new\ groupname>
+ 
 .SH OPTIONS
 .TP
-.B <old username | uid>
-The old name or uid of the user to rename.
+.B <old groupname | gid>
+The old name or gid of the group to rename.
 .TP
-.B <new username>
-The new name of the user.
+.B <new groupname>
+The new name of the group.
 
 .SH "SEE ALSO"
-ldaprenamegroup(1), ldaprenamemachine(1), ldapscripts(5).
+ldaprenameuser(1), ldaprenamemachine(1), ldapscripts(5).
 
 .SH AVAILABILITY
 The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).
 The latest version of the ldapscripts is available on :
 .B http://contribs.martymac.com
-
-.SH LIMITATIONS
-Group entries will NOT be updated. This means several groups may contain users that NO LONGER exist after having renamed a user. Home directories are NOT renamed (neither in he LDAP directory, nor on the filesystem).
 
 .SH BUGS
 No bug known.

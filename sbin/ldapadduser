@@ -1,0 +1,113 @@
+#!/bin/sh
+
+#  ldapadduser : adds a POSIX user account to LDAP
+
+#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
+then
+  echo "Usage : $0 <username> <groupname | gid> [uid]"
+  exit 1
+fi
+
+# Source runtime file
+_RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
+
+# Username = first argument
+_USER="$1"
+# User GID = second argument
+_grouptogid "$2"
+# User UID
+if [ -z "$3" ] # No argument, we must find a correct UID
+then
+  _findlastuser
+else
+  _UID="$3"
+fi
+
+# Compute homedir
+_HOMEDIR=`echo "$UHOMES" | sed "s|%u|$_USER|g"`
+
+# Use template if necessary
+if [ -n "$UTEMPLATE" ] && [ -r "$UTEMPLATE" ]
+then
+  _getldif="cat $UTEMPLATE"
+else
+  _getldif="_extractldif 2"
+fi
+
+# Add user to LDAP
+$_getldif | _filterldif | _askattrs | _utf8encode | _ldapadd
+
+[ $? -eq 0 ] || end_die "Error adding user $_USER to LDAP"
+echo_log "Successfully added user $_USER to LDAP"
+
+# Generate or ask for user password
+if is_like "$PASSWORDGEN" "<ask>"
+then
+  warn_log "Setting password for user $_USER"
+  _askpassword
+else
+  _genpassword "$_USER"
+fi
+
+# Add user password
+if [ -n "$_PASSWORD" ]
+then
+  _changepassword "$_PASSWORD" "uid=$_USER,$USUFFIX,$SUFFIX"
+  [ $? -eq 0 ] && echo_log "Successfully set password for user $_USER"
+else
+  [ -n "$PASSWORDGEN" ] && warn_log "Warning : got invalid password for user $_USER (password not set)"
+fi
+
+# Create Home dir
+if is_yes "$CREATEHOMES"
+then
+  if [ -e "$_HOMEDIR" ]
+  then
+    warn_log "Skipped home directory creation for user $_USER (already exists)"
+  else
+    # Create home by skel or mkdir
+    if [ -d "$HOMESKEL" ]
+    then
+      cp -pR "$HOMESKEL/" "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+    else
+      mkdir -p "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+    fi
+
+    chmod "$HOMEPERMS" "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+    chown -R "$_UID":"$_GID" "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+    echo_log "Successfully created home directory for user $_USER"
+  fi
+fi
+
+end_ok
+
+# Ldif template ##################################
+##dn: uid=<user>,<usuffix>,<suffix>
+##objectClass: account
+##objectClass: posixAccount
+##cn: <user>
+##uid: <user>
+##uidNumber: <uid>
+##gidNumber: <gid>
+##homeDirectory: <home>
+##loginShell: <shell>
+##gecos: <user>
+##description: User account

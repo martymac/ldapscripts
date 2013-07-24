@@ -1,4 +1,4 @@
-.\" Copyright (C) 2006 Ganaël LAPLANCHE
+.\" Copyright (C) 2007 Ganaël LAPLANCHE
 .\"
 .\" This program is free software; you can redistribute it and/or
 .\" modify it under the terms of the GNU General Public License
@@ -19,35 +19,34 @@
 .\" ganael.laplanche@martymac.com
 .\" http://contribs.martymac.com
 .\"
-.TH _ldaprenameuser 1 "January 1, 2006"
+.TH ldapmodifyuser 1 "August 22, 2007"
 .LO 1
 
 .SH NAME
-_ldaprenameuser \- renames a POSIX user account in LDAP.
+ldapmodifyuser \- modifies a POSIX user account in LDAP interactively
 
 .SH SYNOPSIS
-.B _ldaprenameuser
-.RB <old\ username | uid>
-.RB <new\ username>
+.B ldapmodifyuser
+.RB <username | uid>
+ 
+.SH DESCRIPTION
+ldapmodifyuser first looks for the right entry to modify. Once found, the entry is presented and you
+are prompted to enter LDIF data to modify it as you would do using a standard LDIF file and ldapmodify(1).
+The DN of the entry being modified is already specified : just begin with a changeType attribute or any
+other one(s) of your choice (in this case, the defaut changeType is 'modify').
 
 .SH OPTIONS
 .TP
-.B <old username | uid>
-The old name or uid of the user to rename.
-.TP
-.B <new username>
-The new name of the user.
+.B <username | uid>
+The name or uid of the user to modify.
 
 .SH "SEE ALSO"
-ldaprenamegroup(1), ldaprenamemachine(1), ldapscripts(5).
+ldapmodifygroup(1), ldapmodifymachine(1), ldapscripts(5).
 
 .SH AVAILABILITY
 The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).
 The latest version of the ldapscripts is available on :
 .B http://contribs.martymac.com
-
-.SH LIMITATIONS
-Group entries will NOT be updated. This means several groups may contain users that NO LONGER exist after having renamed a user. Home directories are NOT renamed (neither in he LDAP directory, nor on the filesystem).
 
 .SH BUGS
 No bug known.

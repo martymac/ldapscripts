@@ -1,4 +1,4 @@
-.\" Copyright (C) 2006 Ganaël LAPLANCHE
+.\" Copyright (C) 2008 Ganaël LAPLANCHE
 .\"
 .\" This program is free software; you can redistribute it and/or
 .\" modify it under the terms of the GNU General Public License
@@ -19,35 +19,33 @@
 .\" ganael.laplanche@martymac.com
 .\" http://contribs.martymac.com
 .\"
-.TH _ldaprenameuser 1 "January 1, 2006"
+.TH ldapid 1 "July 1, 2008"
 .LO 1
 
 .SH NAME
-_ldaprenameuser \- renames a POSIX user account in LDAP.
+ldapid \- displays a user's list of IDs the way 'id' does.
+.TP
+The following is displayed : uidNumber(uid) gidNumber(cn) groups=gidNumber(cn)[,secondary groups...].
 
 .SH SYNOPSIS
-.B _ldaprenameuser
-.RB <old\ username | uid>
-.RB <new\ username>
-
+.B ldapid
+.RB [-P] [username | uid]
+ 
 .SH OPTIONS
 .TP
-.B <old username | uid>
-The old name or uid of the user to rename.
+.B [username | uid]
+Login or UID of a user to show information about. Acts on current user if not specified.
 .TP
-.B <new username>
-The new name of the user.
+.B [-P]
+Display user information as a password file entry.
 
 .SH "SEE ALSO"
-ldaprenamegroup(1), ldaprenamemachine(1), ldapscripts(5).
+lsldap(1), ldapfinger(1), ldapscripts(5).
 
 .SH AVAILABILITY
 The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).
 The latest version of the ldapscripts is available on :
 .B http://contribs.martymac.com
-
-.SH LIMITATIONS
-Group entries will NOT be updated. This means several groups may contain users that NO LONGER exist after having renamed a user. Home directories are NOT renamed (neither in he LDAP directory, nor on the filesystem).
 
 .SH BUGS
 No bug known.

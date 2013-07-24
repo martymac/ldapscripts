@@ -1,0 +1,38 @@
+#!/bin/sh
+
+#  ldapdeletemachine : deletes a POSIX machine (user$) account from LDAP
+
+#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
+then
+  echo "Usage : $0 <machinename with ending \$ | uid>"
+  exit 1
+fi
+
+# Source runtime file
+_RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
+
+# Find machinename : $1 must exist in LDAP !
+_findentry "$MSUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))"
+[ -z "$_ENTRY" ] && end_die "Machine $1 not found in LDAP (missing ending \$ ?)"
+
+# Delete entry
+_ldapdelete "$_ENTRY" || end_die "Error deleting machine $_ENTRY from LDAP"
+end_ok "Successfully deleted machine $_ENTRY from LDAP"

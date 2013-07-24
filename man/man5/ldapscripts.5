@@ -26,40 +26,52 @@
 ldapscripts \- Scripts to manage POSIX accounts in your LDAP directory.
 
 .SH DESCRIPTION
-The ldapscripts are a set of shell (sh) scripts to manage POSIX accounts in an OpenLDAP directory. They can be used as standalone tools or within Samba's smb.conf file. Each scripts matches a specific smb.conf option, except those beginning with an underscore ("_"), which are just "useful".
+The ldapscripts are a set of shell (sh) scripts designed to manage POSIX accounts in an OpenLDAP directory. They can be used as standalone tools or within Samba 3.x's smb.conf file. 
 
 .SH REQUIREMENTS
-The main requirements are the OpenLDAP client tools (ldapadd, ldapsearch, ldapdelete, ...). Other commands are called in the scripts but shoud come with your distro (sed, grep, cut, ...).
+The main requirements are the OpenLDAP client tools (ldapadd, ldapsearch, ldapdelete, ...). Other commands are called in the scripts but should come with your OS (sed, grep, cut, ...).
 
 .SH CONFIGURATION
-The main configuration of the ldapscripts is usually the /etc/ldapscripts/ldapscripts.conf file (or /usr/local/etc/ldapscripts/ldapscripts.conf, depending on your system). Modify it to fit your needs before using the scripts. Each script also uses a "runtime" file, usually /etc/ldapscripts/runtime (or /usr/local/etc/ldapscripts/runtime). You don't need to modify this file.
+The main configuration of the ldapscripts is usually the file /etc/ldapscripts/ldapscripts.conf (or /usr/local/etc/ldapscripts/ldapscripts.conf, depending on your system). Modify it to fit your needs before using the scripts. Each script also uses a "runtime" file, usually /usr/lib/ldapscripts/runtime (or /usr/local/lib/ldapscripts/runtime). You don't need to modify this file.
+
+.SH TEMPLATES
+Each script that adds information to the directory uses a template. Templates are directly embedded at the end of the scripts but it is also possible to use external template files (see GTEMPLATE, UTEMPLATE and MTEMPLATE variables in the configuration file). Each template consists of a preformatted LDIF file using special keywords that will be replaced on-the-fly. Sample files are provided for your convenience : ldapaddgroup.template.sample, ldapadduser.template.sample and ldapaddmachine.template.sample. It is strongly advised to use those files instead of modifying the embedded (default) templates in the scripts.
+
+Sample templates include every keyword you can use. One special additional keyword is the <ask> keyword that will trigger user input to get the attribute value interactively.
 
 .SH "USING AS STANDALONE TOOLS"
-The scripts can be used as standard command-line tools. Just call the script using correct arguments. Check the man page of the script or call it without any argument to get help.
+Each script can be used as a standard command-line tool. Check their man pages to get help.
 
-.SH "USING WITH SAMBA"
-As I've already explained, each script is designed to fit one configuration option of Samba. Modify you smb.conf file to call the scripts :
+.SH "USING WITH SAMBA 3.x"
+Each Samba 3.x smb.conf "xxx script" option has a matching script. Modify you smb.conf file this way to call them :
 
 .nf
 # [...]
-add machine script = /usr/local/bin/ldapaddmachine '%u' sambamachines
-add user script = /usr/local/bin/ldapadduser '%u' sambausers
-add group script = /usr/local/bin/ldapaddgroup '%g'
-add user to group script = /usr/local/bin/ldapaddusertogroup '%u' '%g'
-delete user script = /usr/local/bin/ldapdeleteuser '%u'
-delete group script = /usr/local/bin/ldapdeletegroup '%g'
-delete user from group script = /usr/local/bin/ldapdeleteuserfromgroup '%u' '%g'
-set primary group script = /usr/local/bin/ldapsetprimarygroup '%u' '%g'
-rename user script = /usr/local/bin/ldaprenameuser '%uold' '%unew'
+add machine script = /usr/local/sbin/ldapaddmachine '%u' sambamachines
+add user script = /usr/local/sbin/ldapadduser '%u' sambausers
+add group script = /usr/local/sbin/ldapaddgroup '%g'
+add user to group script = /usr/local/sbin/ldapaddusertogroup '%u' '%g'
+delete user script = /usr/local/sbin/ldapdeleteuser '%u'
+delete group script = /usr/local/sbin/ldapdeletegroup '%g'
+delete user from group script = /usr/local/sbin/ldapdeleteuserfromgroup '%u' '%g'
+set primary group script = /usr/local/sbin/ldapsetprimarygroup '%u' '%g'
+rename user script = /usr/local/sbin/ldaprenameuser '%uold' '%unew'
 # [...]
 
 .SH "SEE ALSO"
-_ldapdeletemachine(1), _ldapmodifymachine(1), _ldaprenamemachine(1), ldapadduser(1), ldapdeleteuserfromgroup(1),
-_ldapfinger(1), _ldapmodifyuser(1), _lsldap(1), ldapaddusertogroup(1), ldaprenameuser(1), _ldapinit(1),
-_ldappasswd(1), ldapaddgroup(1), ldapdeletegroup(1), ldapsetprimarygroup(1), _ldapmodifygroup(1), _ldaprenamegroup(1),
+ldapdeletemachine(1), ldapmodifymachine(1), ldaprenamemachine(1), ldapadduser(1), ldapdeleteuserfromgroup(1),
+ldapfinger(1), ldapid(1), ldapmodifyuser(1), lsldap(1), ldapaddusertogroup(1), ldaprenameuser(1), ldapinit(1),
+ldapsetpasswd(1), ldapaddgroup(1), ldapdeletegroup(1), ldapsetprimarygroup(1), ldapmodifygroup(1), ldaprenamegroup(1),
 ldapaddmachine(1), ldapdeleteuser(1).
 
 .SH AVAILABILITY
 The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).
 The latest version of the ldapscripts is available on :
 .B http://contribs.martymac.com
+
+.SH BUGS
+Sometimes, that kind of message may appear in the log file :
+.B "Additional information: value does not conform to assertion syntax".
+Setting slapd's debug level to 32 shows additional details :
+.B "get_ava: illegal value for attributeType uidNumber".
+This is *not* a bug : the ldapscripts tend to use the power of LDAP filters to easily find users (or groups) using either a uidNumber (numerical value) or a uid (string value). The following filter (used by ldapfinger(1)) will generate the above message if $_USER is a login : "(|(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))(&(objectClass=posixGroup)(|(cn=$_USER)(gidNumber=$_USER))))" because filter part "(uidNumber=$_USER)" requires an integer but gets a string. You can mostly ignore those warnings.

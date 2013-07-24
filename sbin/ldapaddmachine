@@ -1,0 +1,69 @@
+#!/bin/sh
+
+#  ldapaddmachine : adds a POSIX machine (user$) account to LDAP
+
+#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
+then
+  echo "Usage : $0 <machinename with ending \$> <groupname | gid> [uid]"
+  exit 1
+fi
+
+# Source runtime file
+_RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
+
+# Machine name = first argument
+_USER="$1"
+# Machine GID = second argument
+_grouptogid "$2"
+# Machine UID
+if [ -z "$3" ] # No argument, we must find a correct UID
+then
+  _findlastmachine
+else
+  _UID="$3"
+fi
+
+# Use template if necessary
+if [ -n "$MTEMPLATE" ] && [ -r "$MTEMPLATE" ]
+then
+  _getldif="cat $MTEMPLATE"
+else
+  _getldif="_extractldif 2"
+fi
+
+# Add user to LDAP
+$_getldif | _filterldif | _askattrs | _utf8encode | _ldapadd
+
+[ $? -eq 0 ] || end_die "Error adding machine $_USER to LDAP"
+end_ok "Successfully added machine $_USER to LDAP"
+
+# Ldif template ##################################
+##dn: uid=<user>,<msuffix>,<suffix>
+##objectClass: account
+##objectClass: posixAccount
+##cn: <user>
+##uid: <user>
+##uidNumber: <uid>
+##gidNumber: <gid>
+##homeDirectory: /dev/null
+##loginShell: /bin/false
+##gecos: <user>
+##description: Machine account

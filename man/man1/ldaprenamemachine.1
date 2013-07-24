@@ -19,27 +19,27 @@
 .\" ganael.laplanche@martymac.com
 .\" http://contribs.martymac.com
 .\"
-.TH _ldaprenameuser 1 "January 1, 2006"
+.TH ldaprenamemachine 1 "January 1, 2006"
 .LO 1
 
 .SH NAME
-_ldaprenameuser \- renames a POSIX user account in LDAP.
+ldaprenamemachine \- renames a POSIX machine account in LDAP.
 
 .SH SYNOPSIS
-.B _ldaprenameuser
-.RB <old\ username | uid>
-.RB <new\ username>
-
+.B ldaprenamemachine
+.RB <old\ machinename\ with\ ending\ $ | uid>
+.RB <new\ machinename\ with\ ending\ $>
+ 
 .SH OPTIONS
 .TP
-.B <old username | uid>
-The old name or uid of the user to rename.
+.B <old machinename with ending $ | uid>
+The old name or uid of the machine to rename.
 .TP
-.B <new username>
-The new name of the user.
+.B <new machinename with ending $>
+The new name of the machine.
 
 .SH "SEE ALSO"
-ldaprenamegroup(1), ldaprenamemachine(1), ldapscripts(5).
+ldaprenameuser(1), ldaprenamegroup(1), ldapscripts(5).
 
 .SH AVAILABILITY
 The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).
@@ -47,7 +47,7 @@ The latest version of the ldapscripts is available on :
 .B http://contribs.martymac.com
 
 .SH LIMITATIONS
-Group entries will NOT be updated. This means several groups may contain users that NO LONGER exist after having renamed a user. Home directories are NOT renamed (neither in he LDAP directory, nor on the filesystem).
+Group entries will NOT be updated. This means several groups may contain machines that NO LONGER exist after having renamed a machine.
 
 .SH BUGS
 No bug known.

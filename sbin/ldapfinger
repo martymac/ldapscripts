@@ -1,0 +1,74 @@
+#!/bin/sh
+
+#  ldapfinger : displays a user/machine/group POSIX account's details
+
+#  Copyright (C) 2006 Ganaël LAPLANCHE
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]
+then
+  echo "Usage : $0 [-u | -g | -m] [username | machinename | groupname | uid | gid]"
+  exit 1
+fi
+
+# Source runtime file
+_RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
+
+# Parse options
+case "$1" in
+  "-u" | "-m")
+    if [ -z "$2" ]
+    then
+      # Current user
+      [ -z "$USER" ] && end_die 'Could not guess current user (no $USER variable set)'
+      _USER="$USER"
+    else
+      _USER="$2"
+    fi
+    ;;
+  "-g")
+    # Current user not useable (group required)
+    [ -z "$2" ] && end_die 'Please specify a gid or groupname'
+    _USER="$2"
+    ;;
+  "")
+    # Current user
+    [ -z "$USER" ] && end_die 'Could not guess current user (no $USER variable set)'
+    _USER="$USER"
+    ;;
+  *)
+    _USER="$1"
+    ;;
+esac
+
+case "$1" in
+  "-u")
+    _ldapsearch "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))" || end_die "No user found"
+    ;;
+  "-g")
+    _ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$_USER)(gidNumber=$_USER)))" || end_die "No group found"
+    ;;
+  "-m")
+    _ldapsearch "$MSUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))" || end_die "No machine found"
+    ;;
+  *)
+    _ldapsearch "$SUFFIX" "(|(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))(&(objectClass=posixGroup)(|(cn=$_USER)(gidNumber=$_USER))))" || end_die "No entry found"
+    ;;
+esac
+
+end_ok

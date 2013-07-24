@@ -1,0 +1,50 @@
+#!/bin/sh
+
+#  lsldap : performs a *big* query on the LDAP directory
+
+#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+#  USA.
+
+# WARNING : this script searches the whole directory as $BINDDN... 
+# It may be *VERY* long and return a limited number of entries
+# Always use slapcat to backup your directory !!!
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]
+then
+  echo "Usage : $0 [[-h] | [-u | -g | -m]]"
+  exit 1
+fi
+
+# Source runtime file
+_RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
+. "$_RUNTIMEFILE"
+
+case "$1" in
+  "-u")
+    _ldapsearch "$USUFFIX,$SUFFIX" "(objectClass=posixAccount)" || end_die "No entry found"
+    ;;
+  "-g")
+    _ldapsearch "$GSUFFIX,$SUFFIX" "(objectClass=posixGroup)" || end_die "No entry found"
+    ;;
+  "-m")
+    _ldapsearch "$MSUFFIX,$SUFFIX" "(objectClass=posixAccount)" || end_die "No entry found"
+    ;;
+  *)
+    _ldapsearch "$SUFFIX" || end_die "No entry found"
+    ;;
+esac
+end_ok

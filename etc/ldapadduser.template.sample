@@ -7,5 +7,5 @@ uidNumber: <uid>
 gidNumber: <gid>
 homeDirectory: <home>
 loginShell: <shell>
-gecos: <gecos>
+gecos: <user>
 description: User account
