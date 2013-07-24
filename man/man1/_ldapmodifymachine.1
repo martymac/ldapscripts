@@ -33,8 +33,7 @@ _ldapmodifymachine \- modifies a POSIX machine account in LDAP interactively
 _ldapmodifymachine first looks for the right entry to modify. Once found, the entry is presented and you
 are prompted to enter LDIF data to modify it as you would do using a standard LDIF file and ldapmodify(1).
 The DN of the entry being modified is already specified : just begin with a changeType attribute or any
-other one(s) of your choice (in this case, the defaut changeType is 'modify'). _ldapmodifymachine creates
-temporary files in the $TMPDIR directory specified in the configuration file.
+other one(s) of your choice (in this case, the defaut changeType is 'modify').
 
 .SH OPTIONS
 .TP

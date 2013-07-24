@@ -1,3 +1,48 @@
+2007/10/13 : ldapscripts 1.7.1
+  - Fixes for CVE-2007-5373
+    see http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2007-5373
+    and http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=445582
+
+    1) Up to now, each ldap* command was called with the -w parameter, which allows to
+      specify the bind password on the command line. Unfortunately, this could make the
+      password appear to anybody performing a `ps` during the call. This is now avoided
+      by using the -y parameter and a password file.
+      
+      -> A new BINDPWDFILE option has been added : it specifies the path to the bind
+      password file. This file can be created by something like :
+      'echo -n 'password' > $BINDPWDFILE' and you can now safely remove (or comment) the
+      BINDPWD parameter from your configuration file.
+
+    2) Changing a user password could also reveal the new password on the command line,
+      because of the use of ldappasswd's -s option. This has been fixed by using a temporary
+      file containing the new password (and ldappassword's -T option).
+
+      -> [internals] New mktempf() and reltempf() functions have been added
+
+    [For older versions of OpenLDAP, -y and -T parameters may not be available. It is still
+    possible to use the old BINDPWD parameter. Just uncomment it from the configuration file
+    and comment the BINDPWDFILE parameter (which takes precedence over BINDPWD). The
+    ldapscripts will just behave as previously and use inline -w and -s parameters, warning
+    you this is not secure way of running them.]
+
+    3) A similar problem related to sed expressions has been found : it may also lead to
+      reveal a user's password to `ps` users. This is now fixed by using temporary files
+      containing sed expressions (and sed's -f option).
+
+    4) A new test has been added to check if 'echo' and '[' are built-in or not. If not,
+      you'll be warned that the ldapscripts may not be safe to use (because these commands
+      manipulate passwords when creating temporary files).
+
+      -> [internals] New is_builtin() function
+
+    Note that these flaws depend largely on your kernel configuration : hardened kernels
+    should not be impacted (e.g. if you use security.bsd.see_other_[u|g]ids sysctls on
+    FreeBSD). It may also depend on the version of OpenLDAP client commands you run.
+
+    Thanks a lot to Don and Madcoder for their help !
+
+  - Few fixes to avoid using non-standard 'if ! command's...
+
 2007/09/03 : ldapscripts 1.7
   - Fixed several typos and bugs
   - _ldapinit : new options : '-r' and '-s' to create only the root dn ('-r'), or regular OUs ('-s')

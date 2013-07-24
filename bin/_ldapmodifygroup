@@ -33,13 +33,9 @@ _RUNTIMEFILE="/etc/ldapscripts/runtime"
 _findentry "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))"
 [ -z "$_ENTRY" ] && end_die "Group $1 not found in LDAP"
 
-# Create temp file
-_TMPFILE=`date "+%Y%m%d-%H%M%S"`
-_TMPFILE=".ldapmodifygroup.$_TMPFILE.$$"
-echo "dn: $_ENTRY" > "$TMPDIR/$_TMPFILE" || end_die "Error creating temporary file $TMPDIR/$_TMPFILE"
-
-# Catch CTRL-C to remove $TMPDIR/$_TMPFILE
-trap 'rm -f "$TMPDIR/$_TMPFILE" ; end_die "Interrupted - Removing temporary file"' 2
+# Allocate and create temp file
+mktempf
+echo "dn: $_ENTRY" > "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
 
 # Display entry
 echo "# About to modify the following entry :"
@@ -48,14 +44,14 @@ _ldapsearch "$_ENTRY"
 # Edit entry
 echo "# Enter your modifications here, end with CTRL-D."
 echo "dn: $_ENTRY"
-cat >> "$TMPDIR/$_TMPFILE" || end_die "Error writing to temporary file $TMPDIR/$_TMPFILE"
+cat >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
 
 # Send modifications
-cat "$TMPDIR/$_TMPFILE" | _ldapmodify
+cat "$_TMPFILE" | _ldapmodify
 if [ $? -ne 0 ]
 then
-  rm -f "$TMPDIR/$_TMPFILE" 2>/dev/null
+  reltempf
   end_die "Error modifying group entry $_ENTRY in LDAP"
 fi
-rm -f "$TMPDIR/$_TMPFILE" 2>/dev/null
+reltempf
 end_ok "Successfully modified group entry $_ENTRY in LDAP"

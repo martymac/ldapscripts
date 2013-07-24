@@ -24,7 +24,7 @@ PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 # Where to install man pages
 MANDIR = $(PREFIX)/man
-# Where to install the configuration file
+# Where to install configuration files
 ETCDIR = $(PREFIX)/etc/ldapscripts
 # Where to install the runtime file
 RUNDIR = $(ETCDIR)
@@ -33,10 +33,11 @@ RUNDIR = $(ETCDIR)
 SHELL=/bin/sh
 NAME = ldapscripts
 #SUFFIX = -devel
-VERSION = 1.7
+VERSION = 1.7.1
 
 RUNFILE = runtime
 ETCFILE = ldapscripts.conf
+PWDFILE = ldapscripts.passwd
 BINFILES =	_ldapdeletemachine _ldapmodifygroup _ldappasswd _lsldap ldapadduser \
 			 ldapdeleteuser ldapsetprimarygroup _ldapfinger _ldapmodifymachine \
 			_ldaprenamegroup ldapaddgroup ldapaddusertogroup ldapdeleteuserfromgroup \
@@ -83,6 +84,7 @@ help:
 # Configure target
 configure:
 	@echo -n 'Configuring scripts... '
+	@sed 's|^BINDPWDFILE=.*|BINDPWDFILE=\"$(ETCDIR)/$(PWDFILE)\"|g' 'etc/$(ETCFILE)' > 'etc/$(ETCFILE).patched'
 	@sed 's|^_CONFIGFILE=.*|_CONFIGFILE=\"$(ETCDIR)/$(ETCFILE)\"|g' 'etc/$(RUNFILE)' > 'etc/$(RUNFILE).patched'
 	@for i in $(BINFILES) ; do \
 		sed 's|^_RUNTIMEFILE=.*|_RUNTIMEFILE=\"$(RUNDIR)/$(RUNFILE)\"|g' "bin/$$i" > "bin/$$i.patched" ; \
@@ -114,7 +116,8 @@ installman:
 installetc:
 	@echo -n 'Installing configuration files into $(ETCDIR)... '
 	@mkdir -p '$(ETCDIR)' 2>/dev/null
-	@install -m 640 -b 'etc/$(ETCFILE)' '$(ETCDIR)'
+	@install -m 640 -b 'etc/$(ETCFILE).patched' '$(ETCDIR)/$(ETCFILE)'
+	@install -m 440 -b 'etc/$(PWDFILE)' '$(ETCDIR)'
 	@for i in $(TMPLFILES) ; do \
 		install -m 440 "etc/$$i" '$(ETCDIR)' ; \
 	done
@@ -148,6 +151,7 @@ uninstallman:
 uninstalletc:
 	@echo '(Leaving $(ETCDIR)/$(ETCFILE) as it is the main configuration file)'
 	@echo -n 'Uninstalling other configuration files from $(ETCDIR)... '
+	@rm -f '$(ETCDIR)/$(PWDFILE)'
 	@for i in $(TMPLFILES) ; do \
 		rm -f "$(ETCDIR)/$$i" ; \
 	done
@@ -158,6 +162,7 @@ uninstalletc:
 # Clean targets
 clean:
 	@echo -n 'Cleaning sources... '
+	@rm -f 'etc/$(ETCFILE).patched'
 	@rm -f 'etc/$(RUNFILE).patched'
 	@for i in $(BINFILES) ; do \
 		rm -f "bin/$$i.patched" ; \
