@@ -3,6 +3,7 @@
 #  ldapdeletegroup : deletes a POSIX group account from LDAP
 
 #  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#  Copyright (C) 2006-2011 Ganaël LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -30,7 +31,7 @@ _RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
 . "$_RUNTIMEFILE"
 
 # Find groupname : $1 must exist in LDAP !
-_findentry "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))"
+_findentry "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)(|(cn=$1)(gidNumber=$1)))"
 [ -z "$_ENTRY" ] && end_die "Group $1 not found in LDAP"
 
 # Delete entry

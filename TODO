@@ -1,9 +1,9 @@
 TODO (ideas) :
 **************
 
+- Send ldap clients error logs to stdout as well as to logfile
 - Having a kind of plugin management that would allow users to trigger functions
   (to set specific variables or perform preliminary work)
-- Improve logfile format
 - Make some scripts useable with lower privileges than root :
   - Move ldapid, ldapfinger, ldapsetpasswd, lsldap to bin/ and set them suid
   - Allow common users to use these tools. It will require a kind of privilege separation

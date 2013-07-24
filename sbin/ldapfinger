@@ -2,7 +2,7 @@
 
 #  ldapfinger : displays a user/machine/group POSIX account's details
 
-#  Copyright (C) 2006 Ganaël LAPLANCHE
+#  Copyright (C) 2006-2011 Ganaël LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -35,7 +35,6 @@ case "$1" in
     if [ -z "$2" ]
     then
       # Current user
-      [ -z "$USER" ] && end_die 'Could not guess current user (no $USER variable set)'
       _USER="$USER"
     else
       _USER="$2"
@@ -48,7 +47,6 @@ case "$1" in
     ;;
   "")
     # Current user
-    [ -z "$USER" ] && end_die 'Could not guess current user (no $USER variable set)'
     _USER="$USER"
     ;;
   *)
@@ -61,13 +59,13 @@ case "$1" in
     _ldapsearch "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))" || end_die "No user found"
     ;;
   "-g")
-    _ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$_USER)(gidNumber=$_USER)))" || end_die "No group found"
+    _ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)(|(cn=$_USER)(gidNumber=$_USER)))" || end_die "No group found"
     ;;
   "-m")
     _ldapsearch "$MSUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))" || end_die "No machine found"
     ;;
   *)
-    _ldapsearch "$SUFFIX" "(|(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))(&(objectClass=posixGroup)(|(cn=$_USER)(gidNumber=$_USER))))" || end_die "No entry found"
+    _ldapsearch "$SUFFIX" "(|(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))(&(objectClass=$GCLASS)(|(cn=$_USER)(gidNumber=$_USER))))" || end_die "No entry found"
     ;;
 esac
 

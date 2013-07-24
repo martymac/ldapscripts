@@ -3,6 +3,7 @@
 #  ldapaddgroup : adds a POSIX group entry to LDAP
 
 #  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#  Copyright (C) 2006-2011 Ganaël LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -44,7 +45,14 @@ if [ -n "$GTEMPLATE" ] && [ -r "$GTEMPLATE" ]
 then
   _getldif="cat $GTEMPLATE"
 else
-  _getldif="_extractldif 2"
+  case $GCLASS in
+    posixGroup)
+    _getldif="_extractldif 2"
+    ;;
+    *)
+    _getldif="_extractldif 3"
+    ;;
+  esac
 fi
 
 # Add user to LDAP
@@ -53,9 +61,20 @@ $_getldif | _filterldif | _askattrs | _utf8encode | _ldapadd
 [ $? -eq 0 ] || end_die "Error adding group $_GROUP to LDAP"
 end_ok "Successfully added group $_GROUP to LDAP"
 
-# Ldif template ##################################
+# Ldif templates #################################
+#
+# PosixGroup (level "2") :
 ##dn: cn=<group>,<gsuffix>,<suffix>
-##objectClass: posixGroup
+##objectClass: <gclass>
 ##cn: <group>
 ##gidNumber: <gid>
 ##description: Group account
+#
+# Others (level "3") - RFC 2307bis :
+###dn: cn=<group>,<gsuffix>,<suffix>
+###objectClass: posixGroup
+###objectClass: <gclass>
+###cn: <group>
+###gidNumber: <gid>
+###description: Group account
+###<gmemberattr>: <gdummymember>

@@ -1,3 +1,21 @@
+2010/??/?? : ldapscripts 1.10.0
+  - Added support for groupOfNames/groupOfUniqueNames group entries
+    used in conjunction with RFC 2307bis AUXILIARY posixGroups.
+    It is now possible to handle member users as, respectively, member
+    or uniqueMember full DN entries.
+
+  => thanks to Muzzol for the original patches !
+
+  - Added initial support for SASL authentication
+
+  => thanks to Brian Candler for the original patches !
+
+  - Now use 'logname' instead of 'id' to guess current user
+    (sudo users will now be logged correctly and be able to run ldapid/ldapfinger without argument)
+  - Cleaned log file messages format up
+  - Updated WWW, Copyrights
+  - Several other minor changes and fixes...
+
 2009/07/16 : ldapscripts 1.9.0
   - Fixed a few lines in man pages
   - Changed PASSWORDGEN's default value to not use uuencode anymore

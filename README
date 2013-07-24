@@ -15,7 +15,7 @@ They are designed to be used under GNU/Linux or FreeBSD (any other
 recent UNIX-like should also work) and require several binaries that should 
 come with your OS (uuencode, getent/pw, date, grep, sed, cut, expr...).
 
-Latest version available on http://contribs.martymac.com
+Latest version available on http://contribs.martymac.org
 
 Installing and configuring the ldapscripts :
 ********************************************
@@ -49,7 +49,11 @@ Be sure to include these schemas in your slapd.conf :
 
 - core.schema
 - cosine.schema (for the account objectClass)
-- nis.schema (for the posixAccount objectClass)
+- nis.schema (for the posixAccount objectClass) or a modified
+  RFC 2307bis compliant version of this file if you plan to use
+  AUXILIARY posixGroup objectClasses together with groupOfNames
+  or groupOfUniqueNames objectClasses (see GCLASS parameter in
+  the ldapscripts.conf file).
 
 Using the ldapscripts with Samba 3.x :
 **************************************
@@ -104,10 +108,10 @@ lib/runtime : runtime file used by the scripts (contains functions, etc...)
 sbin/ldapaddgroup : adds a POSIX group to LDAP
 sbin/ldapadduser : adds a POSIX user to LDAP
 sbin/ldapdeletegroup : deletes a POSIX group from LDAP
-sbin/ldapdeleteuserfromgroup : deletes a memberUid entry from a POSIX group
+sbin/ldapdeleteuserfromgroup : deletes a member from a group
 sbin/ldapsetprimarygroup : sets gidNumber of a POSIX user or machine account
 sbin/ldapaddmachine : adds a POSIX machine (user$) to LDAP
-sbin/ldapaddusertogroup : add a memberUid entry to a POSIX group
+sbin/ldapaddusertogroup : adds a member to a group
 sbin/ldapdeleteuser : deletes a POSIX user from LDAP
 sbin/ldaprenameuser : renames a POSIX user account in LDAP
 
@@ -129,7 +133,7 @@ sbin/ldapgid : displays a group's list of IDs
 Author / Licence :
 ******************
 
-These scripts have been written by Ganaël LAPLANCHE (ganael.laplanche@martymac.com)
+These scripts have been written by Ganaël LAPLANCHE (ganael.laplanche@martymac.org)
 and are available within the GPL license (see COPYING for details).
 
 Thanks for using the ldapscripts... Any feedback welcome :)

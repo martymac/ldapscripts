@@ -1,6 +1,7 @@
 #  runtime : this file is used by the ldapscripts, it sould not be used independently
 
 #  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#  Copyright (C) 2006-2011 Ganaël LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -50,6 +51,13 @@ is_uri () {
 # Tests a string
 # Input : string to test ($1)
 # Output : true or false
+is_valid_dn () {
+  echo "$1" | grep -qE "^([^,=]+=[^,=]+,)+$SUFFIX$"
+}
+
+# Tests a string
+# Input : string to test ($1)
+# Output : true or false
 is_b64 () {
   echo "$1" | grep -q '^[^: ]*:: '
 }
@@ -94,7 +102,7 @@ log_only () {
 # Output : nothing
 echo_log () {
   [ -n "$1" ] && echo "$1"
-  [ -n "$1" ] && log_only "$1"
+  [ -n "$1" ] && log_only "  -> $1"
 }
 
 # Echoes (to STDERR) and logs a string to $LOGFILE
@@ -102,7 +110,7 @@ echo_log () {
 # Output : nothing
 warn_log () {
   [ -n "$1" ] && echo "$1" 1>&2
-  [ -n "$1" ] && log_only "$1"
+  [ -n "$1" ] && log_only "  -> $1"
 }
 
 # Echoes/logs $1, exits and returns 0
@@ -154,7 +162,10 @@ reltempf () {
 # Input : base ($1), filter ($2), attribute to display ($3)
 # Output : entry/entries found (stdout)
 _ldapsearch () {
-  if [ -n "$BINDPWDFILE" ]
+  if [ -n "$SASLAUTH" ]
+  then
+    $LDAPSEARCHBIN -Y "$SASLAUTH" -b "${1:-$SUFFIX}" -H "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE"
+  elif [ -n "$BINDPWDFILE" ]
   then
     $LDAPSEARCHBIN -y "$BINDPWDFILE" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE" 
   else
@@ -179,7 +190,10 @@ _ldapadd () {
     ;;
   esac
 
-  if [ -n "$BINDPWDFILE" ]
+  if [ -n "$SASLAUTH" ]
+  then
+    $LDAPADDBIN $_OPTIONS -Y "$SASLAUTH" -H "$SERVER" 2>>"$LOGFILE" 1>/dev/null
+  elif [ -n "$BINDPWDFILE" ]
   then
     $LDAPADDBIN $_OPTIONS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
   else
@@ -204,7 +218,10 @@ _ldapmodify () {
     ;;
   esac
 
-  if [ -n "$BINDPWDFILE" ]
+  if [ -n "$SASLAUTH" ]
+  then
+    $LDAPMODIFYBIN $_OPTIONS -Y "$SASLAUTH" -H "$SERVER" 2>>"$LOGFILE" 1>/dev/null
+  elif [ -n "$BINDPWDFILE" ]
   then
     $LDAPMODIFYBIN $_OPTIONS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
   else
@@ -220,7 +237,10 @@ _ldaprename () {
   then
     end_die "_ldaprename : missing argument(s)"
   else
-    if [ -n "$BINDPWDFILE" ]
+    if [ -n "$SASLAUTH" ]
+    then
+      $LDAPMODRDNBIN -Y "$SASLAUTH" -H "$SERVER" -r "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
+    elif [ -n "$BINDPWDFILE" ]
     then
       $LDAPMODRDNBIN -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -r "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
     else
@@ -234,7 +254,10 @@ _ldaprename () {
 # Output : nothing
 _ldapdelete () {
   [ -z "$1" ] && end_die "_ldapdelete : missing argument"
-  if [ -n "$BINDPWDFILE" ]
+  if [ -n "$SASLAUTH" ]
+  then
+    $LDAPDELETEBIN -Y "$SASLAUTH" -H "$SERVER" -r "$1" 2>>"$LOGFILE" 1>/dev/null
+  elif [ -n "$BINDPWDFILE" ]
   then
     $LDAPDELETEBIN -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -r "$1" 2>>"$LOGFILE" 1>/dev/null
   else
@@ -265,23 +288,32 @@ _filterldif () {
   mktempf
 
   # Generate filter file
-  echo "s|<group>|$_GROUP|g" > "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<user>|$_USER|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<uid>|$_UID|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<gid>|$_GID|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<suffix>|$SUFFIX|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<_suffix>|$_SUFFIX|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<usuffix>|$USUFFIX|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<_usuffix>|$_USUFFIX|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<msuffix>|$MSUFFIX|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<_msuffix>|$_MSUFFIX|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<gsuffix>|$GSUFFIX|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<_gsuffix>|$_GSUFFIX|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<home>|$_HOMEDIR|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<shell>|$USHELL|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<password>|$_PASSWORD|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-#  echo "s|<gecos>|$_GECOS|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
-  echo "s|<entry>|$_ENTRY|g" >> "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
+  cat 2>/dev/null << EOF > "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
+# Generated by ldapscripts - do not edit !
+# Group attributes
+s|<group>|$_GROUP|g
+s|<gclass>|$GCLASS|g
+s|<gmemberattr>|$_GMEMBERATTR|g
+s|<gdummymember>|$GDUMMYMEMBER|g
+# User attributes
+s|<user>|$_USER|g
+s|<uid>|$_UID|g
+s|<udn>|$_UDN|g
+s|<gid>|$_GID|g
+s|<home>|$_HOMEDIR|g
+s|<shell>|$USHELL|g
+s|<password>|$_PASSWORD|g
+s|<entry>|$_ENTRY|g
+# Suffixes
+s|<suffix>|$SUFFIX|g
+s|<_suffix>|$_SUFFIX|g
+s|<usuffix>|$USUFFIX|g
+s|<_usuffix>|$_USUFFIX|g
+s|<msuffix>|$MSUFFIX|g
+s|<_msuffix>|$_MSUFFIX|g
+s|<gsuffix>|$GSUFFIX|g
+s|<_gsuffix>|$_GSUFFIX|g
+EOF
 
   # Use it
   sed -f "$_TMPFILE" 2>>"$LOGFILE"
@@ -404,6 +436,8 @@ _grouptogid () {
   if [ -z "$_GID" ]
   then
     # Try asking LDAP
+    # As we are working with posixGroup attributes (cn, gidNumber) and using RFC 2307bis,
+    # looking for posixGroup objectClasses is sufficient (looking for more specific $GCLASS may miss posixGroup-only entries).
     _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))" gidNumber | grep "gidNumber: " | head -n 1 | sed "s|gidNumber: ||"`
     if [ -z "$_GID" ]
     then
@@ -422,6 +456,8 @@ _gidtogroup () {
   if [ -z "$_GID" ]
   then
     # Try asking LDAP
+    # As we are working with posixGroup attributes (cn, gidNumber) and using RFC 2307bis,
+    # looking for posixGroup objectClasses is sufficient (looking for more specific $GCLASS may miss posixGroup-only entries).
     _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1)))" cn | grep "cn: " | head -n 1 | sed "s|cn: ||"`
     if [ -z "$_GID" ]
     then
@@ -466,12 +502,26 @@ _uidtouser () {
   fi
 }
 
+# Converts to LDAP DN any user passed in as name/uid
+# Input : the name or uid to convert ($1)
+# Output : the result of the conversion ($_UDN)
+_uidtodn () {
+  [ -z "$1" ] && end_die "_uidtodn : missing argument"
+  _UDN=`_ldapsearch "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))" dn | grep "dn: " | head -n 1 | sed "s|dn: ||"`
+  if [ -z "$_UDN" ]
+  then
+    end_die "Cannot resolve uid $1 to DN : not found"
+  fi
+}
+
 ### LDAP advanced functions
 
 # Finds the last group id used in LDAP
 # Input : nothing
 # Output : the last gid used + 1 (so the first useable gid) ($_GID)
 _findlastgroup () {
+  # As we are looking for the last gidNumber of all group entry types and using RFC 2307bis,
+  # looking for posixGroup objectClasses is sufficient (looking for more specific $GCLASS may miss posixGroup-only entries).
   _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" '(objectClass=posixGroup)' gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||" | uniq | sort -n | tail -n 1`
   if [ -z "$_GID" ] || [ ! "$_GID" -gt "$GIDSTART" ]
   then
@@ -572,7 +622,11 @@ _changepassword () {
       echo "$2 : $1" >> "$PASSWORDFILE"
     fi
 
-    if [ -n "$BINDPWDFILE" ]
+    if [ -n "$SASLAUTH" ]
+    then
+      # XXX Is there a reason to allow changing a userPassword attribute here ?
+      end_die "Please, change password in $SASLAUTH database"
+    elif [ -n "$BINDPWDFILE" ]
     then
       ## Change password in a secure way
       # Allocate and create temp file
@@ -620,17 +674,21 @@ fi
 # Pseudo-random number generator
 [ ! -e /dev/random ] && end_die "You need a /dev/random special file to run these scripts"
 
-# Set USER variable to the real user (do not trust current $USER value)
-USER=`id -nu`
+# Set USER variable to the user's login name (do not trust current $USER value)
+USER=`logname 2>/dev/null`
+[ -z "$USER" ] && end_die 'Could not guess current user'
 
-# Check for bindpwd file
-if [ ! -f "$BINDPWDFILE" ] || [ ! -r "$BINDPWDFILE" ]
+# Check for bindpwd file if necessary
+if [ -z "$SASLAUTH" ]
 then
-  if [ -n "$BINDPWD" ]
+  if [ ! -f "$BINDPWDFILE" ] || [ ! -r "$BINDPWDFILE" ]
   then
-    warn_log "Warning : using command-line passwords, ldapscripts may not be safe"
-  else
-    end_die "Unable to read password file $BINDPWDFILE, exiting..."
+    if [ -n "$BINDPWD" ]
+    then
+      warn_log "Warning : using command-line passwords, ldapscripts may not be safe"
+    else
+      end_die "Unable to read password file $BINDPWDFILE, exiting..."
+    fi
   fi
 fi
 
@@ -650,6 +708,24 @@ then
 else
   SERVER="ldap://$SERVER"
 fi
+
+# Group membership management
+case $GCLASS in
+  posixGroup)
+    _GMEMBERATTR="memberUid"
+    ;;
+  groupOfNames)
+    [ -z "$GDUMMYMEMBER" ] && end_die "Please specify a value for GDUMMYMEMBER"
+    _GMEMBERATTR="member"
+    ;;
+  groupOfUniqueNames)
+    [ -z "$GDUMMYMEMBER" ] && end_die "Please specify a value for GDUMMYMEMBER"
+    _GMEMBERATTR="uniqueMember"
+    ;;
+  *)
+    end_die "Invalid value specified for GCLASS, exiting..."
+    ;;
+esac
 
 # Check homes, shell and logfile
 UHOMES=${UHOMES:-"/dev/null"}
@@ -687,6 +763,4 @@ then
 fi
 
 # Record command call into logfile
-_NOW=`date "+%D - %R"`
-log_only ">> $_NOW : Command : $0 $*"
-
+log_only "`date '+%b %d %H:%M:%S'` `uname -n | sed 's|\..*$||'` ldapscripts: `basename $0`($USER): $0 $*"

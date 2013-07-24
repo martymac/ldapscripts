@@ -2,7 +2,7 @@
 
 #  ldapid : displays a user's list of IDs
 
-#  Copyright (C) 2008 Ganaël LAPLANCHE
+#  Copyright (C) 2008-2011 Ganaël LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -36,7 +36,6 @@ case "$1" in
     if [ -z "$2" ]
     then
       # Current user
-      [ -z "$USER" ] && end_die 'Could not guess current user (no $USER variable set)'
       _USER="$USER"
     else
       _USER="$2"
@@ -44,7 +43,6 @@ case "$1" in
     ;;
   "")
     # Standard display requested (current user)
-    [ -z "$USER" ] && end_die 'Could not guess current user (no $USER variable set)'
     _USER="$USER"
     ;;
   *)
@@ -98,13 +96,30 @@ case "$1" in
     # Prepare output
     _OUTPUT="uid=$_UIDNUMBER($_UID) gid=$_PRIMARYGID($_PRIMARYGROUP)"
     _OUTPUT="$_OUTPUT groups=$_PRIMARYGID($_PRIMARYGROUP)"
-    # Get secondary groups
+    # Get secondary groups (posixGroup)
     _SECONDARYGIDS=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$_UID))" gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||"`
     for _SECONDARYGID in $_SECONDARYGIDS
     do
       _gidtogroup "$_SECONDARYGID"
       _OUTPUT="$_OUTPUT,$_SECONDARYGID($_GID)"
     done
+    # Get member groups (groupOfNames, groupOfUniqueNames)
+    if [ "$GCLASS" != "posixGroup" ]
+    then
+      _MEMBERGIDS=`_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)($_GMEMBERATTR=$_ENTRY))" gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||"`
+      _FIRSTPASS=""
+      for _MEMBERGID in $_MEMBERGIDS
+      do
+        _gidtogroup "$_MEMBERGID"
+        if [ -z "$_FIRSTPASS" ]
+        then
+          _OUTPUT="$_OUTPUT groups(member)=$_MEMBERGID($_GID)"
+          _FIRSTPASS="done"
+        else
+          _OUTPUT="$_OUTPUT,$_MEMBERGID($_GID)"
+        fi
+      done
+    fi
     ;;
 esac
 

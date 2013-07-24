@@ -1,4 +1,4 @@
-.\" Copyright (C) 2006 Ganaël LAPLANCHE
+.\" Copyright (C) 2006-2011 Ganaël LAPLANCHE
 .\"
 .\" This program is free software; you can redistribute it and/or
 .\" modify it under the terms of the GNU General Public License
@@ -16,23 +16,25 @@
 .\" USA.
 .\"
 .\" Ganael Laplanche
-.\" ganael.laplanche@martymac.com
-.\" http://contribs.martymac.com
+.\" ganael.laplanche@martymac.org
+.\" http://contribs.martymac.org
 .\"
 .TH ldapdeleteuserfromgroup 1 "January 1, 2006"
 
 .SH NAME
-ldapdeleteuserfromgroup \- deletes a memberUid attribute from a POSIX group in LDAP.
+ldapdeleteuserfromgroup \- deletes a member from a group in LDAP.
 
 .SH SYNOPSIS
 .B ldapdeleteuserfromgroup
-.RB <username>
+.RB <username | dn>
 .RB <groupname | gid>
 
 .SH OPTIONS
 .TP
-.B <username>
+.B <username | dn>
 The name of the user to delete. It can be a machine name (with an ending $) or a user name.
+When working with groupOfNames or groupOfUniqueNames group entries, a full DN can also be
+provided to permit deletion of an entry that does not exist anymore in the directory.
 .TP
 .B <groupname | gid>
 The name or the gid of the group that should say goodbye to the user.
@@ -43,7 +45,7 @@ ldapaddusertogroup(1), ldapsetprimarygroup(1), ldapscripts(5).
 .SH AVAILABILITY
 The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).
 The latest version of the ldapscripts is available on :
-.B http://contribs.martymac.com
+.B http://contribs.martymac.org
 
 .SH BUGS
 No bug known.

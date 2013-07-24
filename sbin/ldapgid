@@ -2,7 +2,7 @@
 
 #  ldapgid : displays a group's list of IDs
 
-#  Copyright (C) 2009 Ganaël LAPLANCHE
+#  Copyright (C) 2009-2011 Ganaël LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -43,7 +43,7 @@ case "$1" in
 esac
 
 # Check groupname
-_findentry "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(|(cn=$_GROUP)(gidNumber=$_GROUP)))"
+_findentry "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)(|(cn=$_GROUP)(gidNumber=$_GROUP)))"
 [ -z "$_ENTRY" ] && end_die "Group $_GROUP not found in LDAP"
 
 # Get each (common) attribute 
@@ -60,7 +60,7 @@ case "$1" in
   "-P")
     # Passwd-like display requested
     _OUTPUT="$_CN:*:$_GIDNUMBER:"
-    # User list (secondary group)
+    # User list (memberUids, posixGroup)
     _SECONDARYUIDS=`_ldapsearch "$_ENTRY" "" memberUid | grep "memberUid: " | sed "s|memberUid: ||"`
     _FIRSTPASS=""
     for _SECONDARYUID in $_SECONDARYUIDS
@@ -73,6 +73,29 @@ case "$1" in
         _OUTPUT="$_OUTPUT,$_SECONDARYUID"
     fi
     done
+    # User list (member DNs, groupOfNames/groupOfUniqueNames)
+    if [ "$GCLASS" != "posixGroup" ]
+    then
+      _SECONDARYDNS=`_ldapsearch "$_ENTRY" "" $_GMEMBERATTR | grep "$_GMEMBERATTR: " | sed "s|$_GMEMBERATTR: ||"`
+      _FIRSTPASS=""
+      for _SECONDARYDN in $_SECONDARYDNS
+      do
+        # Skip dummy member
+        [ "$_SECONDARYDN" = "$GDUMMYMEMBER" ] && continue
+        # Try to find entry
+        _getattribute "$_SECONDARYDN" "uid"
+        [ -z "$_ATTRIBUTE" ] && end_die "Could not find member $_SECONDARYDN in LDAP"
+        # Keep RDN (uid) only
+        _SECONDARYDN="$_ATTRIBUTE"
+        if [ -z "$_FIRSTPASS" ]
+        then
+          _OUTPUT="$_OUTPUT$_SECONDARYDN"
+          _FIRSTPASS="done"
+        else
+          _OUTPUT="$_OUTPUT,$_SECONDARYDN"
+        fi
+      done
+    fi
     ;;
   *)
     # Standard display requested
@@ -91,7 +114,7 @@ case "$1" in
         _OUTPUT="$_OUTPUT,$_PRIMARYUID($_UID)"
       fi
     done
-    # User list (secondary group)
+    # User list (memberUids, posixGroup)
     _SECONDARYUIDS=`_ldapsearch "$_ENTRY" "" memberUid | grep "memberUid: " | sed "s|memberUid: ||"`
     _FIRSTPASS=""
     for _SECONDARYUID in $_SECONDARYUIDS
@@ -105,6 +128,33 @@ case "$1" in
         _OUTPUT="$_OUTPUT,$_UID($_SECONDARYUID)"
       fi
     done
+    # User list (member DNs, groupOfNames/groupOfUniqueNames)
+    if [ "$GCLASS" != "posixGroup" ]
+    then
+      _SECONDARYDNS=`_ldapsearch "$_ENTRY" "" $_GMEMBERATTR | grep "$_GMEMBERATTR: " | sed "s|$_GMEMBERATTR: ||"`
+      _FIRSTPASS=""
+      for _SECONDARYDN in $_SECONDARYDNS
+      do
+        # Skip dummy member
+        [ "$_SECONDARYDN" = "$GDUMMYMEMBER" ] && continue
+        # Try to find entry and get uidNumber
+        _getattribute "$_SECONDARYDN" "uidNumber"
+        [ -z "$_ATTRIBUTE" ] && end_die "Could not find member $_SECONDARYDN in LDAP"
+        _UID="$_ATTRIBUTE"
+        # Get uid
+        _getattribute "$_SECONDARYDN" "uid"
+        [ -z "$_ATTRIBUTE" ] && end_die "Could not find member $_SECONDARYDN in LDAP"
+        # Keep RDN (uid) only
+        _SECONDARYDN="$_ATTRIBUTE"
+        if [ -z "$_FIRSTPASS" ]
+        then
+          _OUTPUT="$_OUTPUT users(members)=$_UID($_SECONDARYDN)"
+          _FIRSTPASS="done"
+        else
+          _OUTPUT="$_OUTPUT,$_UID($_SECONDARYDN)"
+        fi
+      done
+    fi
     ;;
 esac
 
