@@ -33,6 +33,13 @@ is_no () {
   echo "$1" | grep -qi '^no$'
 }
 
+# Tests a string
+# Input : string to test ($1)
+# Output : true or false
+is_uri () {
+  echo "$1" | grep -qi '://'
+}
+
 # Logs a string to $LOGFILE
 # Input : string to log ($1)
 # Output : nothing
@@ -84,26 +91,21 @@ end_die () {
 # Input : base ($1), filter ($2), attribute to display ($3)
 # Output : entry/entries found (stdout)
 _ldapsearch () {
-  if [ -z "$2" ] && [ -z "$3" ]
-  then
-    $LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "ldap://$SERVER" -s sub -LLL 2>>"$LOGFILE"
-  else
-    $LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "ldap://$SERVER" -s sub -LLL "$2" "$3" 2>>"$LOGFILE"
-  fi
+  $LDAPSEARCHBIN -w "$BINDPWD" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE" 
 }
 
 # Adds an entry to the LDAP directory
 # Input : LDIF - entry to add (stdin)
 # Output : nothing
 _ldapadd () {
-  $LDAPADDBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
+  $LDAPADDBIN -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
 }
 
 # Modifies an entry in the LDAP directory
 # Input : LDIF - modification information (stdin)
 # Output : nothing
 _ldapmodify () {
-  $LDAPMODIFYBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" 2>>"$LOGFILE" 1>/dev/null
+  $LDAPMODIFYBIN -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
 }
 
 # Renames an entry in the LDAP directory
@@ -114,7 +116,7 @@ _ldaprename () {
   then
     end_die "_ldaprename : missing argument(s)"
   else
-    $LDAPMODRDNBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" -r "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPMODRDNBIN -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" -r "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
   fi
 }
 
@@ -123,7 +125,7 @@ _ldaprename () {
 # Output : nothing
 _ldapdelete () {
   [ -z "$1" ] && end_die "_ldapdelete : missing argument"
-  $LDAPDELETEBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" -r "$1" 2>>"$LOGFILE" 1>/dev/null
+  $LDAPDELETEBIN -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" -r "$1" 2>>"$LOGFILE" 1>/dev/null
 }
 
 # Extracts LDIF information from $0 (the current script itself)
@@ -206,7 +208,7 @@ _uidtouser () {
 # Input : nothing
 # Output : the last gid used + 1 (so the first useable gid) ($_GID)
 _findlastgroup () {
-  _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" '(objectClass=posixGroup)' gidNumber | grep "gidNumber: " | sed -e "s|gidNumber: ||" | uniq | sort -g | tail -n 1`
+  _GID=`_ldapsearch "$GSUFFIX,$SUFFIX" '(objectClass=posixGroup)' gidNumber | grep "gidNumber: " | sed -e "s|gidNumber: ||" | uniq | sort -n | tail -n 1`
   if [ -z "$_GID" ] || [ ! "$_GID" -gt "$GIDSTART" ]
   then
     _GID="$GIDSTART"
@@ -218,7 +220,7 @@ _findlastgroup () {
 # Input : nothing
 # Output : the last machine id used + 1 (so the first useable machine id) ($_UID)
 _findlastmachine () {
-  _UID=`_ldapsearch "$SUFFIX" '(objectClass=posixAccount)' uidNumber | grep "uidNumber: " | sed -e "s|uidNumber: ||" | uniq | sort -g | tail -n 1`
+  _UID=`_ldapsearch "$SUFFIX" '(objectClass=posixAccount)' uidNumber | grep "uidNumber: " | sed -e "s|uidNumber: ||" | uniq | sort -n | tail -n 1`
   if [ -z "$_UID" ] || [ ! "$_UID" -gt "$MIDSTART" ]
   then
     _UID="$MIDSTART"
@@ -230,7 +232,7 @@ _findlastmachine () {
 # Input : nothing
 # Output : the last user id used + 1 (so the first useable user id) ($_UID)
 _findlastuser () {
-  _UID=`_ldapsearch "$SUFFIX" '(objectClass=posixAccount)' uidNumber | grep "uidNumber: " | sed -e "s|uidNumber: ||" | uniq | sort -g | tail -n 1`
+  _UID=`_ldapsearch "$SUFFIX" '(objectClass=posixAccount)' uidNumber | grep "uidNumber: " | sed -e "s|uidNumber: ||" | uniq | sort -n | tail -n 1`
   if [ -z "$_UID" ] || [ ! "$_UID" -gt "$UIDSTART" ]
   then
     _UID="$UIDSTART"
@@ -267,7 +269,7 @@ _changepassword () {
     then
       echo "$2 : $1" >> "$PASSWORDFILE"
     fi
-    $LDAPPASSWDBIN -w "$BINDPWD" -D "$BINDDN" -xH "ldap://$SERVER" -s "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPPASSWDBIN -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" -s "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
   fi
 }
 
@@ -282,6 +284,12 @@ _CONFIGFILE="/etc/ldapscripts/ldapscripts.conf"
 if [ ! -x "$LDAPADDBIN" ] || [ ! -x "$LDAPDELETEBIN" ] || [ ! -x "$LDAPSEARCHBIN" ] || [ ! -x "$LDAPMODIFYBIN" ] || [ ! -x "$LDAPPASSWDBIN" ] || [ ! -x "$LDAPMODRDNBIN" ]
 then
   end_die "You must have OpenLDAP client commands installed before running these scripts"
+fi
+
+# Check if a full URI has been given
+if ! is_uri "$SERVER"
+then
+  SERVER="ldap://$SERVER"
 fi
 
 # Check homes, shell and logfile

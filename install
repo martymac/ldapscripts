@@ -37,6 +37,7 @@ cp -f bin/_ldaprenamemachine "${BINDIR}"
 cp -f bin/_ldapinit "${BINDIR}"
 cp -f bin/_lsldap "${BINDIR}"
 cp -f bin/_ldappasswd "${BINDIR}"
+cp -f bin/_ldapfinger "${BINDIR}"
 cp -f bin/ldapaddgroup "${BINDIR}"
 cp -f bin/ldapadduser "${BINDIR}"
 cp -f bin/ldapdeletegroup "${BINDIR}"
@@ -67,6 +68,7 @@ then
   echo "Old configuration file found, saved as ${ETCDIR}/${ETCFILE}.old"
 fi
 cp -f etc/ldapscripts.conf "${ETCDIR}/${ETCFILE}"
+cp -f etc/*.template.sample "${ETCDIR}/"
 
 mkdir -p "${RUNTIMEDIR}" 2>/dev/null
 cp -f etc/runtime "${RUNTIMEDIR}/${RUNTIMEFILE}"

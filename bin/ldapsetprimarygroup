@@ -42,7 +42,7 @@ _extractldif | _filterldif | _ldapmodify
 [ $? -eq 0 ] || end_die "Error setting primary group for user $1 (to group $2)"
 end_ok "Successfully set primary group for user $1 (to group $2)"
 
-# Ldif info ##################################
+# Ldif template ##################################
 ##dn: <entry>
 ##changetype: modify
 ##replace: gidNumber

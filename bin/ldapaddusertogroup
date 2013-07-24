@@ -42,7 +42,7 @@ _extractldif | _filterldif | _ldapmodify
 [ $? -eq 0 ] || end_die "Error adding user $_UID to group $_GID"
 end_ok "Successfully added user $_UID to group $_GID"
 
-# Ldif info ##################################
+# Ldif template ##################################
 ##dn: cn=<gid>,<gsuffix>,<suffix>
 ##changetype: modify
 ##add: memberUid

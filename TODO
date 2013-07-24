@@ -1,10 +1,12 @@
 TODO (ideas) :
 **************
 
+- Replace the install script by a clean Makefile file
 - Add a 'dry-run' option to (only) display LDIF data
+- Add an option to delete users' home directories
+- Add a script to manipulate entries' attributes
 
-- Add more options to the scripts (a better options parsing will be necessary)
+- Add more options to the scripts (a better parsing will be necessary)
   - an option to modify the home dirs (LDAP + directory + rights) of a user when renaming it ?
   - an option to modify related groups (memberUid's) when renaming/deleting a user/machine ?
   - an option to block deleting a group if it is a user's primary group ?
-

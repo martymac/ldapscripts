@@ -53,8 +53,16 @@ else
   _GECOS="$_USER"
 fi
 
+# Use template if necessary
+if [ -n "$UTEMPLATE" ] && [ -r "$UTEMPLATE" ]
+then
+  _getldif="cat $UTEMPLATE"
+else
+  _getldif="_extractldif"
+fi
+
 # Add user to LDAP
-_extractldif | _filterldif | _ldapadd
+$_getldif | _filterldif | _ldapadd
 
 [ $? -eq 0 ] || end_die "Error adding user $_USER to LDAP"
 echo_log "Successfully added user $_USER to LDAP"
@@ -81,7 +89,7 @@ then
       mkdir -p "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
     fi
 
-    chmod 700 "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
+    chmod "$HOMEPERMS" "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
     chown -R "$_UID":"$_GID" "$_HOMEDIR" 2>>"$LOGFILE" 1>/dev/null
     echo_log "Successfully created home directory for user $_USER"
   fi
@@ -89,7 +97,7 @@ fi
 
 end_ok
 
-# Ldif info ##################################
+# Ldif template ##################################
 ##dn: uid=<user>,<usuffix>,<suffix>
 ##objectClass: account
 ##objectClass: posixAccount

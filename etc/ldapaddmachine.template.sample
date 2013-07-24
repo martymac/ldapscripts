@@ -1,0 +1,11 @@
+dn: uid=<user>,<msuffix>,<suffix>
+objectClass: account
+objectClass: posixAccount
+cn: <user>
+uid: <user>
+uidNumber: <uid>
+gidNumber: <gid>
+homeDirectory: /dev/null
+loginShell: /bin/false
+gecos: <user>
+description: Machine account

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#  ldapadduser : adds a POSIX user account to LDAP
+#  _ldappasswd : modifies a POSIX user account's password in LDAP
 
 #  Copyright (C) 2006 Ganaël LAPLANCHE
 #
@@ -55,7 +55,7 @@ else # Have to use the *encoded* password given on the command line
   end_ok "Successfully set encoded password for user $_ENTRY"
 fi
 
-# Ldif info ##################################
+# Ldif template ##################################
 ##dn: <entry>
 ##changetype: modify
 ##replace: userPassword

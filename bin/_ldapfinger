@@ -1,8 +1,8 @@
 #!/bin/sh
 
-#  ldapaddgroup : adds a POSIX group entry to LDAP
+#  _ldapfinger : displays a user/machine/group POSIX account's details
 
-#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
+#  Copyright (C) 2006 Ganaël LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@
 
 if [ -z "$1" ]
 then
-  echo "Usage : $0 <groupname> [gid]"
+  echo "Usage : $0 <username | machinename | groupname | uid | gid>"
   exit 1
 fi
 
@@ -29,33 +29,5 @@ fi
 _RUNTIMEFILE="/etc/ldapscripts/runtime"
 . "$_RUNTIMEFILE"
 
-# Group name
-_GROUP="$1"
-# Group GID
-if [ -z "$2" ] # No argument, we must find a correct GID
-then
-  _findlastgroup
-else
-  _GID="$2"
-fi
-
-# Use template if necessary
-if [ -n "$GTEMPLATE" ] && [ -r "$GTEMPLATE" ]
-then
-  _getldif="cat $GTEMPLATE"
-else
-  _getldif="_extractldif"
-fi
-
-# Add user to LDAP
-$_getldif | _filterldif | _ldapadd
-
-[ $? -eq 0 ] || end_die "Error adding group $_GROUP to LDAP"
-end_ok "Successfully added group $_GROUP to LDAP"
-
-# Ldif template ##################################
-##dn: cn=<group>,<gsuffix>,<suffix>
-##objectClass: posixGroup
-##cn: <group>
-##gidNumber: <gid>
-##description: Group account
+# Find and display the entry
+_ldapsearch "$SUFFIX" "(|(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))(&(objectClass=posixGroup)(|(cn=$1)(gidNumber=$1))))"

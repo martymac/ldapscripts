@@ -41,12 +41,21 @@ else
   _UID="$3"
 fi
 
-_extractldif | _filterldif | _ldapadd
+# Use template if necessary
+if [ -n "$MTEMPLATE" ] && [ -r "$MTEMPLATE" ]
+then
+  _getldif="cat $MTEMPLATE"
+else
+  _getldif="_extractldif"
+fi
+
+# Add user to LDAP
+$_getldif | _filterldif | _ldapadd
 
 [ $? -eq 0 ] || end_die "Error adding machine $_USER to LDAP"
 end_ok "Successfully added machine $_USER to LDAP"
 
-# Ldif info ##################################
+# Ldif template ##################################
 ##dn: uid=<user>,<msuffix>,<suffix>
 ##objectClass: account
 ##objectClass: posixAccount

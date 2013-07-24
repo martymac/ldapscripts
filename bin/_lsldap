@@ -24,6 +24,5 @@ _RUNTIMEFILE="/etc/ldapscripts/runtime"
 . "$_RUNTIMEFILE"
 
 # Search whole directory as $BINDDN... may be *VERY* long and return a limited number of entries
-# Prefer slapcat to backup you LDAP !
+# Use slapcat to backup your directory !
 _ldapsearch "$SUFFIX"
-

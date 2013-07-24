@@ -34,7 +34,7 @@ _extractldif | _filterldif | _ldapadd
 [ $? -eq 0 ] || end_die "Error initializing LDAP tree"
 end_ok "Successfully initialized LDAP tree"
 
-# Ldif info ##################################
+# Ldif template ##################################
 ##dn: <suffix>
 ##objectClass: dcObject
 ##objectClass: organization

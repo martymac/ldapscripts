@@ -1,0 +1,52 @@
+.\" Copyright (C) 2007 Ganaël LAPLANCHE
+.\"
+.\" This program is free software; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License
+.\" as published by the Free Software Foundation; either version 2
+.\" of the License, or (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+.\" USA.
+.\"
+.\" Ganael Laplanche
+.\" ganael.laplanche@martymac.com
+.\" http://contribs.martymac.com
+.\"
+.TH _ldapfinger 1 "February 1, 2007"
+.LO 1
+
+.SH NAME
+_ldapfinger \- displays a user/machine/group POSIX account's details.
+
+.SH SYNOPSIS
+.B _ldapfinger
+.RB <username | machinename | groupname | uid | gid>
+ 
+.SH OPTIONS
+.TP
+.B <username | machinename | groupname | uid | gid>
+The name or id of the user, machine (with an ending $) or group you want to display. You may use a wildcard here to look for substrings. e.g. 'marty*' or '*mart*'.
+
+.SH "SEE ALSO"
+ldapscripts(5).
+
+.SH AVAILABILITY
+The ldapscripts are provided under the GNU General Public License v2 (see COPYING for more details).
+The latest version of the ldapscripts is available on :
+.B http://contribs.martymac.com
+
+.SH LIMITATIONS
+When used interactively, passwords generated with this command are propagated with the ldappasswd(1) command.
+Thus, the resulting format depends on the 'password-hash' option of your server's slapd.conf(5) file.
+
+You can always force an encoded password (using the hash format of your choice) by specifying it on the command line.
+
+.SH BUGS
+No bug known.

@@ -1,3 +1,14 @@
+2007/04/20 : ldapscripts 1.6
+  - Fixed typos
+  - internal _ldapsearch() improved
+  - New _ldapfinger command to display a user/machine/group POSIX account's details
+  - ldapadduser : new option to set the defaults permissions when creating home directories (thanks to Guillaume Rousse)
+  - It is now possible to use a full URI instead of a name for the SERVER directive (thanks to Guillaume Rousse)
+  - It is now possible to use external LDIF templates when creating a user/machine/group (thanks to Guillaume Rousse)
+    See TEMPLATES options in the ldapscripts.conf file and *.template.sample files in the etc/ directory
+  - Now use 'sort -n' instead of 'sort -g' when extracting the last account from the directory (thanks to Rudi van Drunen)
+  - Added a 'description' attribute for group accounts
+
 2007/01/03 : ldapscripts 1.5
   - Fixed typos (thanks to Mikael Lammentausta)
   - Small fixes to the install script

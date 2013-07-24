@@ -103,6 +103,7 @@ _lsldap : performs a *big* recursive query on the LDAP server from the root dn
 _ldaprenamemachine : renames a POSIX machine account in LDAP
 _ldaprenamegroup : renames a POSIX group in LDAP
 _ldappasswd : modifies a POSIX user account's password in LDAP
+_ldapfinger : displays a user/machine/group POSIX account's details
 
 Author / Licence :
 ******************
