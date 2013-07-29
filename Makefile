@@ -25,7 +25,7 @@ PREFIX = /usr/local
 SHELL= /bin/sh
 NAME = ldapscripts
 #SUFFIX = -devel
-VERSION = 2.0.0
+VERSION = 2.0.1
 
 # Default installation paths
 SBINDIR = $(PREFIX)/sbin
@@ -104,11 +104,11 @@ installman:
 	@echo -n 'Installing man files into $(DESTDIR)$(MANDIR)... '
 	@install -d -m 755 '$(DESTDIR)$(MANDIR)/man1' 2>/dev/null
 	@for i in $(MAN1FILES) ; do \
-		cat "man/man1/$$i" | gzip - > "$(DESTDIR)$(MANDIR)/man1/$(basename $$i).gz" ; \
+		cat "man/man1/$$i" | gzip - > "$(DESTDIR)$(MANDIR)/man1/`basename $$i`.gz" ; \
 	done
 	@install -d -m 755 '$(DESTDIR)$(MANDIR)/man5' 2>/dev/null
 	@for i in $(MAN5FILES) ; do \
-		cat "man/man5/$$i" | gzip - > "$(DESTDIR)$(MANDIR)/man5/$(basename $$i).gz" ; \
+		cat "man/man5/$$i" | gzip - > "$(DESTDIR)$(MANDIR)/man5/`basename $$i`.gz" ; \
 	done
 	@echo 'ok.'
 
@@ -148,11 +148,11 @@ uninstallsbin:
 uninstallman:
 	@echo -n 'Uninstalling man files from $(DESTDIR)$(MANDIR)... '
 	@for i in $(MAN1FILES) ; do \
-		rm -f "$(DESTDIR)$(MANDIR)/man1/$(basename $$i).gz" ; \
+		rm -f "$(DESTDIR)$(MANDIR)/man1/`basename $$i`.gz" ; \
 	done
 	@rmdir '$(DESTDIR)$(MANDIR)/man1' 2>/dev/null || true
 	@for i in $(MAN5FILES) ; do \
-		rm -f "$(DESTDIR)$(MANDIR)/man5/$(basename $$i).gz" ; \
+		rm -f "$(DESTDIR)$(MANDIR)/man5/`basename $$i`.gz" ; \
 	done
 	@rmdir '$(DESTDIR)$(MANDIR)/man5' 2>/dev/null || true
 	@rmdir '$(MANDIR)' 2>/dev/null || true

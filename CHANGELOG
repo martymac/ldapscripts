@@ -1,3 +1,7 @@
+2011/04/19 : ldapscripts 2.0.1
+  - Fix man pages installation
+    (broken by wrong `` -> $() substitutions in Makefile)
+
 2011/04/18 : ldapscripts 2.0.0
   - Next user and machine IDs now evolve independently (Debian bug #609148) :
       - they are guessed from their respective suffix
