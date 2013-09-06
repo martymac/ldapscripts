@@ -164,12 +164,12 @@ reltempf () {
 _ldapsearch () {
   if [ -n "$SASLAUTH" ]
   then
-    $LDAPSEARCHBIN $LDAPSEARCHOPTS -Y "$SASLAUTH" -b "${1:-$SUFFIX}" -H "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE"
+    $LDAPSEARCHBIN $LDAPBINOPTS $LDAPSEARCHOPTS -Y "$SASLAUTH" -b "${1:-$SUFFIX}" -H "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE"
   elif [ -n "$BINDPWDFILE" ]
   then
-    $LDAPSEARCHBIN $LDAPSEARCHOPTS -y "$BINDPWDFILE" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE" 
+    $LDAPSEARCHBIN $LDAPBINOPTS $LDAPSEARCHOPTS -y "$BINDPWDFILE" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE" 
   else
-    $LDAPSEARCHBIN $LDAPSEARCHOPTS -w "$BINDPWD" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE" 
+    $LDAPSEARCHBIN $LDAPBINOPTS $LDAPSEARCHOPTS -w "$BINDPWD" -D "$BINDDN" -b "${1:-$SUFFIX}" -xH "$SERVER" -s sub -LLL "${2:-(objectclass=*)}" "${3:-*}" 2>>"$LOGFILE" 
   fi
 }
 
@@ -192,12 +192,12 @@ _ldapadd () {
 
   if [ -n "$SASLAUTH" ]
   then
-    $LDAPADDBIN $_OPTIONS -Y "$SASLAUTH" -H "$SERVER" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPADDBIN $LDAPBINOPTS $_OPTIONS -Y "$SASLAUTH" -H "$SERVER" 2>>"$LOGFILE" 1>/dev/null
   elif [ -n "$BINDPWDFILE" ]
   then
-    $LDAPADDBIN $_OPTIONS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPADDBIN $LDAPBINOPTS $_OPTIONS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
   else
-    $LDAPADDBIN $_OPTIONS -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPADDBIN $LDAPBINOPTS $_OPTIONS -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
   fi
 }
 
@@ -220,12 +220,12 @@ _ldapmodify () {
 
   if [ -n "$SASLAUTH" ]
   then
-    $LDAPMODIFYBIN $_OPTIONS -Y "$SASLAUTH" -H "$SERVER" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPMODIFYBIN $LDAPBINOPTS $_OPTIONS -Y "$SASLAUTH" -H "$SERVER" 2>>"$LOGFILE" 1>/dev/null
   elif [ -n "$BINDPWDFILE" ]
   then
-    $LDAPMODIFYBIN $_OPTIONS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPMODIFYBIN $LDAPBINOPTS $_OPTIONS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
   else
-    $LDAPMODIFYBIN $_OPTIONS -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPMODIFYBIN $LDAPBINOPTS $_OPTIONS -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" 2>>"$LOGFILE" 1>/dev/null
   fi
 }
 
@@ -239,12 +239,12 @@ _ldaprename () {
   else
     if [ -n "$SASLAUTH" ]
     then
-      $LDAPMODRDNBIN -Y "$SASLAUTH" -H "$SERVER" -r "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
+      $LDAPMODRDNBIN $LDAPBINOPTS -Y "$SASLAUTH" -H "$SERVER" -r "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
     elif [ -n "$BINDPWDFILE" ]
     then
-      $LDAPMODRDNBIN -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -r "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
+      $LDAPMODRDNBIN $LDAPBINOPTS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -r "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
     else
-      $LDAPMODRDNBIN -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" -r "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
+      $LDAPMODRDNBIN $LDAPBINOPTS -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" -r "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
     fi
   fi
 }
@@ -256,12 +256,12 @@ _ldapdelete () {
   [ -z "$1" ] && end_die "_ldapdelete : missing argument"
   if [ -n "$SASLAUTH" ]
   then
-    $LDAPDELETEBIN -Y "$SASLAUTH" -H "$SERVER" -r "$1" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPDELETEBIN $LDAPBINOPTS -Y "$SASLAUTH" -H "$SERVER" -r "$1" 2>>"$LOGFILE" 1>/dev/null
   elif [ -n "$BINDPWDFILE" ]
   then
-    $LDAPDELETEBIN -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -r "$1" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPDELETEBIN $LDAPBINOPTS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -r "$1" 2>>"$LOGFILE" 1>/dev/null
   else
-    $LDAPDELETEBIN -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" -r "$1" 2>>"$LOGFILE" 1>/dev/null
+    $LDAPDELETEBIN $LDAPBINOPTS -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" -r "$1" 2>>"$LOGFILE" 1>/dev/null
   fi
 }
 
@@ -675,7 +675,7 @@ _changepassword () {
       # Generate password file
       echo -n "$1" > "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
       # Change password
-      $LDAPPASSWDBIN -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -T "$_TMPFILE" "$2" 2>>"$LOGFILE" 1>/dev/null
+      $LDAPPASSWDBIN $LDAPBINOPTS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -T "$_TMPFILE" "$2" 2>>"$LOGFILE" 1>/dev/null
       _RESULT=$?
       # Release temp file
       reltempf
@@ -683,7 +683,7 @@ _changepassword () {
       return $_RESULT
     else
       ## Change password in the unsecure, old-fashioned way
-      $LDAPPASSWDBIN -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" -s "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
+      $LDAPPASSWDBIN $LDAPBINOPTS -w "$BINDPWD" -D "$BINDDN" -xH "$SERVER" -s "$1" "$2" 2>>"$LOGFILE" 1>/dev/null
     fi
   fi
 }

@@ -1,3 +1,7 @@
+????/??/?? : ldapscripts 2.0.5
+  - Add LDAP client common additional options
+    Submitted by: Michael Bejer-Andersen <mband@mmmi.sdu.dk>
+
 2013/07/23 : ldapscripts 2.0.4
   - ldapaddusertogroup and ldapdeleteuserfromgroup are now able to work on
     groups located in sub-OUs of $GSUFFIX
