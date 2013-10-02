@@ -717,7 +717,7 @@ fi
 
 # Set USER variable to the user's login name (do not trust current $USER value)
 USER=$(logname 2>/dev/null)
-[ -z "$USER" ] && end_die 'Could not guess current user'
+[ -n "$USER" ] || USER=$(id -un 2>/dev/null)
 
 # Check for bindpwd file if necessary
 if [ -z "$SASLAUTH" ]
