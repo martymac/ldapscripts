@@ -804,4 +804,4 @@ then
 fi
 
 # Record command call into logfile
-log_only "$(date '+%b %d %H:%M:%S') $(uname -n | sed 's|\..*$||') ldapscripts: $(basename $0)($USER): $0 $*"
+log_only "$(date '+%b %d %H:%M:%S') $(uname -n | sed 's|\..*$||') ldapscripts: $(basename "$0")($USER): $0 $*"
