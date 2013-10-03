@@ -1,3 +1,13 @@
+2013/??/?? : ldapscripts 2.0.6
+  - Fix Launchpad bug #1218775
+    (prevent log_only() from failing when called
+    from a script that contains a space in its name)
+  - Fix Debian bug #719295
+    (use 'id' as a last resort to get user name)
+  - Create logfile with restricted access rights
+
+  => Those 3 patches were sent by: Alexander Gerasiov <gq@debian.org>
+
 2013/09/10 : ldapscripts 2.0.5
   - Add LDAP client common additional options
     Submitted by: Michael Bejer-Andersen <mband@mmmi.sdu.dk>
