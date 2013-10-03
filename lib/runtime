@@ -86,11 +86,14 @@ log_only () {
     then
       if [ ! -w "$LOGFILE" ]
       then
+        _TMPMASK=$(umask)
+        umask 0077
         touch "$LOGFILE" 2>/dev/null
         if [ $? -ne 0 ]
         then
           echo "Unable to create $LOGFILE, exiting..." && exit 1
         fi
+        umask "$_TMPMASK"
       fi
       echo "$1" >> "$LOGFILE"
     fi
