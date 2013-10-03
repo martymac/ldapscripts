@@ -1,6 +1,9 @@
 TODO (ideas) :
 **************
 
+- Ability to specify gecos and cn as command line arguments to ldapadduser
+- Ability to pass password to ldapsetpasswd in a secure way (via file)
+
 - Get rid of functions returning their results through shared variables
 - Call variables using the cleaner ${} syntax
 - Improve ldapid/ldapgid to dump the whole directory if no argument is given
