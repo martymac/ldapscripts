@@ -79,7 +79,7 @@ is_builtin () {
 # Logs a string to $LOGFILE
 # Input : string to log ($1)
 # Output : nothing
-log_only () {
+log_to_file () {
   if [ -n "$1" ]
   then
     if [ -n "$LOGFILE" ]
@@ -97,6 +97,32 @@ log_only () {
       fi
       echo "$1" >> "$LOGFILE"
     fi
+  fi
+}
+
+# Logs a string to syslog
+# Input : string to log ($1)
+# Output : nothing
+log_to_syslog () {
+  if [ -n "$1" ]
+  then
+    SYSLOGFACILITY=${SYSLOGFACILITY:-"local4"}
+    SYSLOGLEVEL=${SYSLOGLEVEL:-"info"}
+    logger -it "$(basename $0)" -p "$SYSLOGFACILITY"."$SYSLOGLEVEL" "$1"
+  fi
+}
+
+# Logs a string to $LOGFILE and/or to syslog
+# Input : string to log ($1)
+# Output : nothing
+log_only () {
+  if [ "$LOGTOFILE" = "yes" ]
+  then
+    log_to_file "$1"
+  fi
+  if [ "$LOGTOSYSLOG" = "yes" ]
+  then
+    log_to_syslog "$1"
   fi
 }
 
@@ -806,5 +832,12 @@ then
   esac
 fi
 
-# Record command call into logfile
-log_only "$(date '+%b %d %H:%M:%S') $(uname -n | sed 's|\..*$||') ldapscripts: $(basename "$0")($USER): $0 $*"
+# Log command
+if [ "$LOGTOFILE" = "yes" ]
+then
+  log_to_file "$(date '+%b %d %H:%M:%S') $(uname -n | sed 's|\..*$||') ldapscripts: $(basename "$0")($USER): $0 $*"
+fi
+if [ "$LOGTOSYSLOG" = "yes" ]
+then
+  log_to_syslog "($USER): $0 $*"
+fi
