@@ -306,7 +306,7 @@ _extractldif () {
     warn_log "Warning : invalid depth supplied to _extractldif(), using default (2)..."
     _EXTRACTDEPTH='2'
   fi
-  grep "^#\{$_EXTRACTDEPTH\}[^#]*$" "$0" | sed 's|^#*||' 2>>"$LOGFILE"
+  grep -a "^#\{$_EXTRACTDEPTH\}[^#]*$" "$0" | sed 's|^#*||' 2>>"$LOGFILE"
 }
 
 # Filters LDIF information
