@@ -692,11 +692,7 @@ _changepassword () {
       echo "$2 : $1" >> "$PASSWORDFILE"
     fi
 
-    if [ -n "$SASLAUTH" ]
-    then
-      # XXX Is there a reason to allow changing a userPassword attribute here ?
-      end_die "Please, change password in $SASLAUTH database"
-    elif [ -n "$BINDPWDFILE" ]
+    if [ -n "$SASLAUTH" ] || [ -n "$BINDPWDFILE" ]
     then
       ## Change password in a secure way
       # Allocate and create temp file
@@ -704,7 +700,12 @@ _changepassword () {
       # Generate password file
       echo -n "$1" > "$_TMPFILE" || end_die "Error writing to temporary file $_TMPFILE"
       # Change password
-      $LDAPPASSWDBIN $LDAPBINOPTS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -T "$_TMPFILE" "$2" 2>>"$LOGFILE" 1>/dev/null
+      if [ -n "$SASLAUTH" ]
+      then
+        $LDAPPASSWDBIN $LDAPBINOPTS -Y "$SASLAUTH" -H "$SERVER" -T "$_TMPFILE" "$2" 2>>"$LOGFILE" 1>/dev/null
+      else # [ -n "$BINDPWDFILE" ]
+        $LDAPPASSWDBIN $LDAPBINOPTS -y "$BINDPWDFILE" -D "$BINDDN" -xH "$SERVER" -T "$_TMPFILE" "$2" 2>>"$LOGFILE" 1>/dev/null
+      fi
       _RESULT=$?
       # Release temp file
       reltempf

@@ -5,12 +5,14 @@
   - Fix Debian bug #719295
     (use 'id' as a last resort to get user name)
   - Create logfile with restricted access rights
-
   => Those 3 patches were sent by: Alexander Gerasiov <gq@debian.org>
 
   - Add syslog support
-
   => Thanks to Vincent Qéméner for this contribution (sent through Github)
+
+  - Fix extracting templates in all locales
+  - Allow modifying user passwords when using SASL
+  => Thanks to Sunil Mohan Adapa for those contributions (sent through Github)
 
 2013/09/10 : ldapscripts 2.0.5
   - Add LDAP client common additional options
