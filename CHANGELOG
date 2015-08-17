@@ -1,4 +1,4 @@
-2015/??/?? : ldapscripts 2.0.6
+2015/08/17 : ldapscripts 2.0.6
   - Fix Launchpad bug #1218775
     (prevent log_only() from failing when called
     from a script that contains a space in its name)
