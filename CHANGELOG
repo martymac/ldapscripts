@@ -1,3 +1,9 @@
+2016/??/?? : ldapscripts 2.0.7
+  - Fix Ubuntu bug #1292143
+    Remove a user from his secondary groups when deleting him
+  => Reported by Matej Pastor on Launchpad and relayed by Alexander Gerasiov <gq@debian.org> on SF.
+     Initial patch by Kam Nasim, thanks!
+
 2015/08/17 : ldapscripts 2.0.6
   - Fix Launchpad bug #1218775
     (prevent log_only() from failing when called

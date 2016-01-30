@@ -34,6 +34,54 @@ _RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
 _findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))"
 [ -z "$_ENTRY" ] && end_die "User $1 not found in LDAP"
 
+# Store _UID and _UDN for filters
+if [ "$GCLASS" = "posixGroup" ]
+then
+  _getattribute "$_ENTRY" "uid"
+  [ -z "$_ATTRIBUTE" ] && end_die "Error getting user attribute from LDAP (uid)"
+  _UID="$_ATTRIBUTE"
+fi
+_UDN="$_ENTRY"
+
 # Delete entry
-_ldapdelete "$_ENTRY" || end_die "Error deleting user $_ENTRY from LDAP"
-end_ok "Successfully deleted user $_ENTRY from LDAP"
+_ldapdelete "$_UDN" || end_die "Error deleting user $_UDN from LDAP"
+
+# Finally, delete this user from all his secondary groups
+case $GCLASS in
+  posixGroup)
+    _findentries "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$_UID))"
+    echo "$_ENTRIES" | \
+    while read _ENTRY
+    do
+      echo_log "Deleting user from secondary group: $_ENTRY"
+      # Modify group entry
+      _extractldif 2 | _filterldif | _utf8encode | _ldapmodify
+    done
+  ;;
+  *)
+    _findentries "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)($_GMEMBERATTR=$_UDN))"
+    echo "$_ENTRIES" | \
+    while read _ENTRY
+    do
+      echo_log "Deleting user from secondary group: $_ENTRY"
+      # Modify group entry
+      _extractldif 3 | _filterldif | _utf8encode | _ldapmodify
+    done
+  ;;
+esac
+
+end_ok "Successfully deleted user $_UDN from LDAP"
+
+# Ldif templates #################################
+#
+# PosixGroup (level "2") :
+##dn: <entry>
+##changetype: modify
+##delete: <gmemberattr>
+##<gmemberattr>: <uid>
+#
+# Others (level "3") :
+###dn: <entry>
+###changetype: modify
+###delete: <gmemberattr>
+###<gmemberattr>: <udn>
