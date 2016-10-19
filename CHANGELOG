@@ -1,4 +1,6 @@
 ????/??/?? : ldapscripts 2.0.8
+  - Honour LDAPSCRIPTS_CONF environment variable
+  => Reported by James Valleroy on Github (closes issue #6)
 
 2016/06/20 : ldapscripts 2.0.7
   - Fix Ubuntu bug #1292143

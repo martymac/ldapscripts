@@ -83,10 +83,10 @@ help:
 # Configure target
 configure:
 	@echo -n 'Configuring scripts... '
-	@sed 's|^BINDPWDFILE=.*|BINDPWDFILE=\"$(ETCDIR)/$(PWDFILE)\"|g' 'etc/$(ETCFILE)' > 'etc/$(ETCFILE).patched'
-	@sed 's|^_CONFIGFILE=.*|_CONFIGFILE=\"$(ETCDIR)/$(ETCFILE)\"|g' 'lib/$(RUNFILE)' > 'lib/$(RUNFILE).patched'
+	@sed 's|^BINDPWDFILE=.*|BINDPWDFILE="$(ETCDIR)/$(PWDFILE)"|g' 'etc/$(ETCFILE)' > 'etc/$(ETCFILE).patched'
+	@sed '/^_CONFIGFILE=/s|^\(.*"\).*\(".*\)|\1$(ETCDIR)/$(ETCFILE)\2|g' 'lib/$(RUNFILE)' > 'lib/$(RUNFILE).patched'
 	@for i in $(SBINFILES) ; do \
-		sed 's|^_RUNTIMEFILE=.*|_RUNTIMEFILE=\"$(LIBDIR)/$(RUNFILE)\"|g' "sbin/$$i" > "sbin/$$i.patched" ; \
+		sed 's|^_RUNTIMEFILE=.*|_RUNTIMEFILE="$(LIBDIR)/$(RUNFILE)"|g' "sbin/$$i" > "sbin/$$i.patched" ; \
 	done
 	@echo 'ok.'
 

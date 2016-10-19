@@ -31,7 +31,9 @@ The ldapscripts are a set of shell (sh) scripts designed to manage POSIX account
 The main requirements are the OpenLDAP client tools (ldapadd, ldapsearch, ldapdelete, ...). Other commands are called in the scripts but should come with your OS (sed, grep, cut, ...).
 
 .SH CONFIGURATION
-The main configuration of the ldapscripts is usually the file /etc/ldapscripts/ldapscripts.conf (or /usr/local/etc/ldapscripts/ldapscripts.conf, depending on your system). Modify it to fit your needs before using the scripts. Each script also uses a "runtime" file, usually /usr/lib/ldapscripts/runtime (or /usr/local/lib/ldapscripts/runtime). You don't need to modify this file.
+The main configuration of the ldapscripts is usually the file /etc/ldapscripts/ldapscripts.conf (or /usr/local/etc/ldapscripts/ldapscripts.conf, depending on your system). Modify it to fit your needs before using the scripts. You can override that default path by defining the LDAPSCRIPTS_CONF environment variable.
+
+Each script also uses a "runtime" file, usually /usr/lib/ldapscripts/runtime (or /usr/local/lib/ldapscripts/runtime). You don't need to modify this file.
 
 .SH TEMPLATES
 Each script that adds information to the directory uses a template. Templates are directly embedded at the end of the scripts but it is also possible to use external template files (see GTEMPLATE, UTEMPLATE and MTEMPLATE variables in the configuration file). Each template consists of a preformatted LDIF file using special keywords that will be replaced on-the-fly. Sample files are provided for your convenience : ldapaddgroup.template.sample, ldapadduser.template.sample and ldapaddmachine.template.sample. It is strongly advised to use those files instead of modifying the embedded (default) templates in the scripts.

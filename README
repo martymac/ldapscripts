@@ -130,6 +130,12 @@ sbin/ldapfinger : displays a user/machine/group POSIX account's details
 sbin/ldapid : displays a user's list of IDs
 sbin/ldapgid : displays a group's list of IDs
 
+Environment :
+*************
+
+You can set the LDAPSCRIPTS_CONF environment variable to override default
+configuration file's location.
+
 Author / Licence :
 ******************
 
