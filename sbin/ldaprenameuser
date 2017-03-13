@@ -36,57 +36,67 @@ _findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(uid=$2))"
 # Find src username : $1 must exist in LDAP !
 _findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))"
 [ -z "$_ENTRY" ] && end_die "User $1 not found in LDAP"
-_OLDUID=$(_uidtouser "$1")
-_OLDUDN="$_ENTRY"
+
+# Store _UID and _UDN for filters
+if [ "$GCLASS" = "posixGroup" ]
+then
+  _getattribute "$_ENTRY" "uid"
+  [ -z "$_ATTRIBUTE" ] && end_die "Error getting user attribute from LDAP (uid)"
+  _UID="$_ATTRIBUTE"
+fi
+_UDN="$_ENTRY"
 
 # Rename entry
 _ldaprename "$_ENTRY" "uid=$2" || end_die "Error renaming user $_ENTRY to $2 in LDAP"
 
-# Get the dest user DN
+# Store _NEWUID and _NEWUDN for filters
 _findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(uid=$2))"
+[ -z "$_ENTRY" ] && end_die "Renamed user $2 not found in LDAP"
 _NEWUID="$2"
 _NEWUDN="$_ENTRY"
 
 # Finally, rename this user in all his secondary groups
 case $GCLASS in
   posixGroup)
-    _findentries "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$_OLDUID))"
+    _findentries "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$_UID))"
     [ -n "$_ENTRIES" ] && echo "$_ENTRIES" | \
     while read _ENTRY
     do
       echo_log "Renaming user in secondary group: $_ENTRY"
+      # Modify group entry
       _extractldif 2 | _filterldif | _utf8encode | _ldapmodify
     done
   ;;
   *)
-    _findentries "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)($_GMEMBERATTR=$_OLDUDN))"
+    _findentries "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)($_GMEMBERATTR=$_UDN))"
     [ -n "$_ENTRIES" ] && echo "$_ENTRIES" | \
     while read _ENTRY
     do
       echo_log "Renaming user in secondary group: $_ENTRY"
+      # Modify group entry
       _extractldif 3 | _filterldif | _utf8encode | _ldapmodify
     done
   ;;
 esac
 
-end_ok "Successfully renamed user $_OLDUDN to $_NEWUID in LDAP"
+end_ok "Successfully renamed user $_UDN to $_NEWUID in LDAP"
 
 # Ldif templates #################################
 #
 # PosixGroup (level "2") :
 ##dn: <entry>
 ##changetype: modify
+##delete: <gmemberattr>
+##<gmemberattr>: <uid>
+##-
 ##add: <gmemberattr>
 ##<gmemberattr>: <newuid>
-##-
-##delete: <gmemberattr>
-##<gmemberattr>: <olduid>
 #
 # Others (level "3") :
 ###dn: <entry>
 ###changetype: modify
+###delete: <gmemberattr>
+###<gmemberattr>: <udn>
+###-
 ###add: <gmemberattr>
 ###<gmemberattr>: <newudn>
-###-
-###delete: <gmemberattr>
-###<gmemberattr>: <oldudn>
