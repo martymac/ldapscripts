@@ -36,7 +36,57 @@ _findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(uid=$2))"
 # Find src username : $1 must exist in LDAP !
 _findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))"
 [ -z "$_ENTRY" ] && end_die "User $1 not found in LDAP"
+_OLDUID=$(_uidtouser "$1")
+_OLDUDN="$_ENTRY"
 
 # Rename entry
 _ldaprename "$_ENTRY" "uid=$2" || end_die "Error renaming user $_ENTRY to $2 in LDAP"
-end_ok "Successfully renamed user $_ENTRY to $2 in LDAP"
+
+# Get the dest user DN
+_findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(uid=$2))"
+_NEWUID="$2"
+_NEWUDN="$_ENTRY"
+
+# Finally, rename this user in all his secondary groups
+case $GCLASS in
+  posixGroup)
+    _findentries "$GSUFFIX,$SUFFIX" "(&(objectClass=posixGroup)(memberUid=$_OLDUID))"
+    [ -n "$_ENTRIES" ] && echo "$_ENTRIES" | \
+    while read _ENTRY
+    do
+      echo_log "Renaming user in secondary group: $_ENTRY"
+      _extractldif 2 | _filterldif | _utf8encode | _ldapmodify
+    done
+  ;;
+  *)
+    _findentries "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)($_GMEMBERATTR=$_OLDUDN))"
+    [ -n "$_ENTRIES" ] && echo "$_ENTRIES" | \
+    while read _ENTRY
+    do
+      echo_log "Renaming user in secondary group: $_ENTRY"
+      _extractldif 3 | _filterldif | _utf8encode | _ldapmodify
+    done
+  ;;
+esac
+
+end_ok "Successfully renamed user $_OLDUDN to $_NEWUID in LDAP"
+
+# Ldif templates #################################
+#
+# PosixGroup (level "2") :
+##dn: <entry>
+##changetype: modify
+##add: <gmemberattr>
+##<gmemberattr>: <newuid>
+##-
+##delete: <gmemberattr>
+##<gmemberattr>: <olduid>
+#
+# Others (level "3") :
+###dn: <entry>
+###changetype: modify
+###add: <gmemberattr>
+###<gmemberattr>: <newudn>
+###-
+###delete: <gmemberattr>
+###<gmemberattr>: <oldudn>

@@ -327,7 +327,11 @@ s|<gdummymember>|$GDUMMYMEMBER|g
 # User attributes
 s|<user>|$_USER|g
 s|<uid>|$_UID|g
+s|<olduid>|$_OLDUID|g
+s|<newuid>|$_NEWUID|g
 s|<udn>|$_UDN|g
+s|<oldudn>|$_OLDUDN|g
+s|<newudn>|$_NEWUDN|g
 s|<gid>|$_GID|g
 s|<home>|$_HOMEDIR|g
 s|<shell>|$USHELL|g
