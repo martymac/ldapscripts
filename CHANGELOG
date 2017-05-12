@@ -1,4 +1,4 @@
-????/??/?? : ldapscripts 2.0.8
+2017/05/12 : ldapscripts 2.0.8
   - Honour LDAPSCRIPTS_CONF environment variable
   => Reported by James Valleroy on Github (closes issue #6)
   - Rename a user's group memberships when renaming a user
