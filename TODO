@@ -24,3 +24,4 @@ TODO (ideas) :
   - an option to modify the home dirs (LDAP + directory + rights) of a user when renaming it ?
   - an option to modify related groups (memberUid's) when renaming/deleting a user/machine ?
   - an option to block deleting a group if it is a user's primary group ?
+- Add scripts to easily get/set a single attribute
