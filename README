@@ -125,7 +125,7 @@ sbin/ldapmodifymachine : modifies a POSIX machine account in LDAP interactively
 sbin/ldapmodifygroup : modifies a POSIX group account in LDAP interactively
 sbin/ldaprenamemachine : renames a POSIX machine account in LDAP
 sbin/ldaprenamegroup : renames a POSIX group in LDAP
-sbin/ldapsetpasswd : modifies a POSIX user account's password in LDAP
+sbin/ldapsetpasswd : modifies a POSIX user or machine account's password in LDAP
 sbin/ldapfinger : displays a user/machine/group POSIX account's details
 sbin/ldapid : displays a user's list of IDs
 sbin/ldapgid : displays a group's list of IDs

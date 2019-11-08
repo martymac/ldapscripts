@@ -1,3 +1,7 @@
+????/??/?? : ldapscripts 2.0.9
+  - Allow renaming a machine account's password with ldapsetpasswd
+  => Reported by Andrew Gallaghe on Github (closes issue #12)
+
 2017/05/12 : ldapscripts 2.0.8
   - Honour LDAPSCRIPTS_CONF environment variable
   => Reported by James Valleroy on Github (closes issue #6)

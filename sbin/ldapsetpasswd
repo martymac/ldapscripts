@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#  ldapsetpasswd : modifies a POSIX user account's password in LDAP
+#  ldapsetpasswd : modifies a POSIX user or machine account's password in LDAP
 
 #  Copyright (C) 2006-2017 Ganaël LAPLANCHE
 #
@@ -21,7 +21,7 @@
 
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
 then
-  echo "Usage : $0 <username | uid> [encoded password]"
+  echo "Usage : $0 [-u | -m] <username | machinename | uid> [encoded password]"
   exit 1
 fi
 
@@ -29,26 +29,49 @@ fi
 _RUNTIMEFILE="/usr/lib/ldapscripts/runtime"
 . "$_RUNTIMEFILE"
 
-# Find username : $1 must exist in LDAP !
-_findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$1)(uidNumber=$1)))"
-[ -z "$_ENTRY" ] && end_die "User $1 not found in LDAP"
+# Parse options
+case "$1" in
+  "-u" | "-m")
+    [ -z "$2" ] && end_die 'Please specify a gid or groupname'
+    _USER="$2"
+    _PASSWD="$3"
+    ;;
+  *)
+    _USER="$1"
+    _PASSWD="$2"
+    ;;
+esac
 
-if [ -z "$2" ] # Have to prompt for a *clear* password
+# Find account : $_USER must exist in LDAP !
+case "$1" in
+  "-u")
+    _findentry "$USUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))"
+    ;;
+  "-m")
+    _findentry "$MSUFFIX,$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))"
+    ;;
+  *)
+    _findentry "$SUFFIX" "(&(objectClass=posixAccount)(|(uid=$_USER)(uidNumber=$_USER)))"
+    ;;
+esac
+[ -z "$_ENTRY" ] && end_die "Account $_USER not found in LDAP"
+
+if [ -z "$_PASSWD" ] # Have to prompt for a *clear* password
 then
-  warn_log "Changing password for user $_ENTRY"
+  warn_log "Changing password for account $_ENTRY"
   # Ask for password
   _askpassword
   [ -z "$_PASSWORD" ] && end_die "Invalid password, please try again"
-  # Change user's password
+  # Change account password
   _changepassword "$_PASSWORD" "$_ENTRY"
-  [ $? -eq 0 ] || end_die "Error setting password for user $_ENTRY"
-  end_ok "Successfully set password for user $_ENTRY"
+  [ $? -eq 0 ] || end_die "Error setting password for account $_ENTRY"
+  end_ok "Successfully set password for account $_ENTRY"
 else # Have to use the *encoded* password given on the command line
   # Use LDIF info to modify the password
-  _PASSWORD="$2"
+  _PASSWORD="$_PASSWD"
   _extractldif 2 | _filterldif | _utf8encode | _ldapmodify
-  [ $? -eq 0 ] || end_die "Error setting encoded password for user $_ENTRY"
-  end_ok "Successfully set encoded password for user $_ENTRY"
+  [ $? -eq 0 ] || end_die "Error setting encoded password for account $_ENTRY"
+  end_ok "Successfully set encoded password for account $_ENTRY"
 fi
 
 # Ldif template ##################################

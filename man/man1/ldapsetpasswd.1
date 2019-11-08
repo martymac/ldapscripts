@@ -22,17 +22,24 @@
 .TH ldapsetpasswd 1 "November 1, 2006"
 
 .SH NAME
-ldapsetpasswd \- modifies a POSIX user account's password in LDAP.
+ldapsetpasswd \- modifies a POSIX user or machine account's password in LDAP.
 
 .SH SYNOPSIS
 .B ldapsetpasswd
-.RB <username | uid>
+.RB [-u | -m]
+.RB <username | machinename | uid>
 .RB [encoded password]
  
 .SH OPTIONS
 .TP
-.B <username | uid>
-The name or uid of the user whose password has to be modified.
+.B [-u]
+Act on user accounts only (by default, search the whole directory for the first matching account).
+.TP
+.B [-m]
+Act on machine accounts only (by default, search the whole directory for the first matching account).
+.TP
+.B <username | machinename | uid>
+The name or uid of the user or machine whose password has to be modified.
 .TP
 .B [encoded password]
 If specified this way, the password will be copied verbatim into the LDAP directory. If not specified, you will 
