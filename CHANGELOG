@@ -24,7 +24,7 @@
   => Those 3 patches were sent by: Alexander Gerasiov <gq@debian.org>
 
   - Add syslog support
-  => Thanks to Vincent Qéméner for this contribution (sent through Github)
+  => Thanks to Vincent QÃ©mÃ©ner for this contribution (sent through Github)
 
   - Fix extracting templates in all locales
   - Allow modifying user passwords when using SASL
@@ -90,7 +90,7 @@
     It is now possible to handle member users as, respectively, member
     or uniqueMember full DN entries.
 
-  => thanks to Àngel "muzzol" Bosch for the original patches !
+  => thanks to Ã€ngel "muzzol" Bosch for the original patches !
 
   - Added initial support for SASL authentication
 

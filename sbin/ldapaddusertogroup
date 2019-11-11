@@ -2,8 +2,8 @@
 
 #  ldapaddusertogroup : adds a member to a group in LDAP
 
-#  Copyright (C) 2005 Ganaël LAPLANCHE - Linagora
-#  Copyright (C) 2006-2017 Ganaël LAPLANCHE
+#  Copyright (C) 2005 GanaÃ«l LAPLANCHE - Linagora
+#  Copyright (C) 2006-2017 GanaÃ«l LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License

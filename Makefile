@@ -1,6 +1,6 @@
 #  Makefile for the lapscripts
 
-#  Copyright (C) 2007-2017 Ganaël LAPLANCHE
+#  Copyright (C) 2007-2017 GanaÃ«l LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
