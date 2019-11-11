@@ -2,7 +2,7 @@
 
 #  ldapfinger : displays a user/machine/group POSIX account's details
 
-#  Copyright (C) 2006-2017 Ganaël LAPLANCHE
+#  Copyright (C) 2006-2019 Ganaël LAPLANCHE
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
