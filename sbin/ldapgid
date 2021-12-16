@@ -73,7 +73,7 @@ case "$1" in
         _OUTPUT="$_OUTPUT,$_SECONDARYUID"
     fi
     done
-    # User list (member DNs, groupOfNames/groupOfUniqueNames)
+    # User list (member DNs, groupOfNames/groupOfUniqueNames/groupOfMembers)
     if [ "$GCLASS" != "posixGroup" ]
     then
       _SECONDARYDNS=$(_ldapsearch "$_ENTRY" "" $_GMEMBERATTR | grep "$_GMEMBERATTR: " | sed "s|$_GMEMBERATTR: ||")

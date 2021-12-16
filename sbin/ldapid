@@ -104,7 +104,7 @@ case "$1" in
       [ -z "$_GID" ] && end_die "Cannot resolve gid $_SECONDARYGID to group : not found"
       _OUTPUT="$_OUTPUT,$_SECONDARYGID($_GID)"
     done
-    # Get member groups (groupOfNames, groupOfUniqueNames)
+    # Get member groups (groupOfNames, groupOfUniqueNames, groupOfMembers)
     if [ "$GCLASS" != "posixGroup" ]
     then
       _MEMBERGIDS=$(_ldapsearch "$GSUFFIX,$SUFFIX" "(&(objectClass=$GCLASS)($_GMEMBERATTR=$_ENTRY))" gidNumber | grep "gidNumber: " | sed "s|gidNumber: ||")

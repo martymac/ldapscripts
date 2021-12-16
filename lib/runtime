@@ -802,6 +802,9 @@ case $GCLASS in
     [ -z "$GDUMMYMEMBER" ] && end_die "Please specify a value for GDUMMYMEMBER"
     _GMEMBERATTR="uniqueMember"
     ;;
+  groupOfMembers)
+    _GMEMBERATTR="member"
+    ;;
   *)
     end_die "Invalid value specified for GCLASS, exiting..."
     ;;

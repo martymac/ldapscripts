@@ -1,6 +1,8 @@
 ????/??/?? : ldapscripts 2.0.9
   - Allow renaming a machine account's password with ldapsetpasswd
   => Reported by Andrew Gallaghe on Github (closes issue #12)
+  - Added support for groupOfMembers group entries (RFC 2307bis)
+  => Reported by sgparry on Github (closes issue #13)
 
 2017/05/12 : ldapscripts 2.0.8
   - Honour LDAPSCRIPTS_CONF environment variable

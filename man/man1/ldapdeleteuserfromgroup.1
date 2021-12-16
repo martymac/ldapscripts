@@ -33,7 +33,7 @@ ldapdeleteuserfromgroup \- deletes a member from a group in LDAP.
 .TP
 .B <username | dn>
 The name of the user to delete. It can be a machine name (with an ending $) or a user name.
-When working with groupOfNames or groupOfUniqueNames group entries, a full DN can also be
+When working with groupOfNames, groupOfUniqueNames or groupOfMembers group entries, a full DN can also be
 provided to permit deletion of an entry that does not exist anymore in the directory.
 .TP
 .B <groupname | gid>

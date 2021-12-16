@@ -51,8 +51,11 @@ else
     posixGroup)
     _getldif="_extractldif 2"
     ;;
-    *)
+    groupOfMembers)
     _getldif="_extractldif 3"
+    ;;
+    *)
+    _getldif="_extractldif 4"
     ;;
   esac
 fi
@@ -72,11 +75,20 @@ end_ok "Successfully added group $_GROUP to LDAP"
 ##gidNumber: <gid>
 ##description: Group account
 #
-# Others (level "3") - RFC 2307bis :
+# groupOfMembers (level "3") - RFC 2307bis
 ###dn: cn=<group>,<gsuffix>,<suffix>
 ###objectClass: posixGroup
 ###objectClass: <gclass>
 ###cn: <group>
 ###gidNumber: <gid>
 ###description: Group account
-###<gmemberattr>: <gdummymember>
+#
+# Others (level "4") - RFC 2307bis
+# where a dummy member is necessary
+####dn: cn=<group>,<gsuffix>,<suffix>
+####objectClass: posixGroup
+####objectClass: <gclass>
+####cn: <group>
+####gidNumber: <gid>
+####description: Group account
+####<gmemberattr>: <gdummymember>

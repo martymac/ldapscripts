@@ -51,9 +51,9 @@ Be sure to include these schemas in your slapd.conf :
 - cosine.schema (for the account objectClass)
 - nis.schema (for the posixAccount objectClass) or a modified
   RFC 2307bis compliant version of this file if you plan to use
-  AUXILIARY posixGroup objectClasses together with groupOfNames
-  or groupOfUniqueNames objectClasses (see GCLASS parameter in
-  the ldapscripts.conf file).
+  AUXILIARY posixGroup objectClasses together with groupOfNames,
+  groupOfUniqueNames or groupOfMembers objectClasses (see GCLASS
+  parameter in the ldapscripts.conf file).
 
 Using the ldapscripts with Samba 3.x :
 **************************************
