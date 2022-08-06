@@ -41,7 +41,7 @@ SBINFILES =	ldapdeletemachine ldapmodifygroup ldapsetpasswd lsldap ldapadduser \
 			ldapdeleteuser ldapsetprimarygroup ldapfinger ldapid ldapgid ldapmodifymachine \
 			ldaprenamegroup ldapaddgroup ldapaddusertogroup ldapdeleteuserfromgroup \
 			ldapinit ldapmodifyuser ldaprenamemachine ldapaddmachine ldapdeletegroup \
-			ldaprenameuser
+			ldaprenameuser ldapnextuid
 MAN1FILES =	ldapdeletemachine.1 ldapmodifymachine.1 ldaprenamemachine.1 ldapadduser.1 \
 			ldapdeleteuserfromgroup.1 ldapfinger.1 ldapid.1 ldapgid.1 ldapmodifyuser.1 lsldap.1 \
 			ldapaddusertogroup.1 ldaprenameuser.1 ldapinit.1 ldapsetpasswd.1 ldapaddgroup.1 \

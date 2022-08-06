@@ -129,6 +129,7 @@ sbin/ldapsetpasswd : modifies a POSIX user or machine account's password in LDAP
 sbin/ldapfinger : displays a user/machine/group POSIX account's details
 sbin/ldapid : displays a user's list of IDs
 sbin/ldapgid : displays a group's list of IDs
+sbin/ldapnextuid : displays the first available user ID
 
 Environment :
 *************
